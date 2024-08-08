@@ -10,3 +10,12 @@ Features
 - User Management: Add or remove users, define roles, and assign permissions.
 - Notifications: Receive updates on task progress, upcoming deadlines, and project changes.
 - Reporting: Generate detailed reports on project performance, team productivity, and resource utilization.
+
+Getting Started
+
+1. Clone the repository:
+
+'''
+git clone https://github.com/yourusername/projectmanager.git
+cd projectmanager
+'''
