@@ -4,10 +4,17 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:unite/auth/handler/handler.dart';
 import 'package:unite/firebase_options.dart';
+import 'package:window_manager/window_manager.dart';
 
-void main( ) {
+void main() {
   WidgetsFlutterBinding.ensureInitialized();
   Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+  WindowOptions windowOptions =
+      const WindowOptions(minimumSize: Size(1200, 800));
+  windowManager.waitUntilReadyToShow(windowOptions, () async {
+    await windowManager.show();
+    await windowManager.focus();
+  });
   runApp(MobileApp());
 }
 
@@ -34,7 +41,12 @@ class _SplashState extends State<Splash> {
     // TODO: implement initState
     super.initState();
     Timer(const Duration(seconds: 1), () {
-      Navigator.pushReplacement(context, MaterialPageRoute(builder: (context)=> Auth()));
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(
+          builder: (context) => const Auth(),
+        ),
+      );
     });
   }
 
