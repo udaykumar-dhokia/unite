@@ -22,9 +22,10 @@ class _DesktopProjectsState extends State<DesktopProjects> {
     });
     final data = await FirebaseFirestore.instance
         .collection("users")
-        .where("email", isEqualTo: user!.email).get();
+        .where("email", isEqualTo: user!.email)
+        .get();
 
-    for(var docs in data.docs){
+    for (var docs in data.docs) {
       setState(() {
         userData = docs.data();
       });
@@ -43,22 +44,37 @@ class _DesktopProjectsState extends State<DesktopProjects> {
 
   @override
   Widget build(BuildContext context) {
-    return isLoading? const Scaffold(
-      body: Center(
-        child: CircularProgressIndicator( color: AppColors.warningColor,),
-      ),
-    ) :  Scaffold(
-      backgroundColor: AppColors.white,
-      appBar: AppBar(
-        backgroundColor: AppColors.white,
-        title: Text(userData!["name"]),
-        actions: [
-          IconButton(onPressed: (){
-            FirebaseAuth.instance.signOut();
-            Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => const DesktopLogin()));
-          }, icon: const Icon(Icons.logout))
-        ],
-      ),
-    );
+    return isLoading
+        ? const Scaffold(
+            body: Center(
+              child: CircularProgressIndicator(
+                color: AppColors.warningColor,
+              ),
+            ),
+          )
+        : Scaffold(
+            backgroundColor: AppColors.white,
+            appBar: AppBar(
+              backgroundColor: AppColors.white,
+              title: Text(userData!["name"]),
+              actions: [
+                IconButton(
+                  onPressed: () {
+                    FirebaseAuth.instance.signOut();
+                    Navigator.pushReplacement(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const DesktopLogin(),
+                      ),
+                    );
+                  },
+                  icon: const Icon(Icons.logout),
+                ),
+                // CircleAvatar(
+                //   backgroundImage: NetworkImage(userData!["profileImage"]),
+                // ),
+              ],
+            ),
+          );
   }
 }

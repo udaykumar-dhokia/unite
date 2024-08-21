@@ -10,6 +10,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:pinput/pinput.dart';
 import 'package:unite/auth/signup/app_signup.dart';
 import 'package:unite/auth/signup/desktop_signup.dart';
+import 'package:unite/components/sidepanel/sidepanel.dart';
 import 'package:unite/components/textfield/textfield.dart';
 import 'package:unite/constants/color/color.dart';
 import 'package:unite/pages/projects/desktop_projects.dart';
@@ -76,7 +77,7 @@ class _DesktopLoginState extends State<DesktopLogin> {
               autoDismiss: true)
           .show(context);
       Navigator.pushReplacement(context,
-          MaterialPageRoute(builder: (context) => const DesktopProjects()));
+          MaterialPageRoute(builder: (context) => const SidePanel()));
     } catch (e) {
       setState(() {
         isLoading = false;

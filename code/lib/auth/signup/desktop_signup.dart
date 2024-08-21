@@ -129,6 +129,22 @@ class _DesktopSignupState extends State<DesktopSignup> {
           .doc(data["username"])
           .set(data);
 
+      String fileName = 'profile_images/${data["username"]}/${DateTime.now().millisecondsSinceEpoch}.png';
+      Reference firebaseStorageRef =
+          FirebaseStorage.instance.ref().child(fileName);
+      
+
+      UploadTask uploadTask = firebaseStorageRef.putFile(
+        _profileImage!,
+        SettableMetadata(contentType: 'image/png'),
+      );
+
+      TaskSnapshot taskSnapshot = await uploadTask;
+      String downloadUrl = await taskSnapshot.ref.getDownloadURL();
+
+      await FirebaseFirestore.instance.collection("users").doc(data["username"]).update({"profileImage": downloadUrl});
+
+
       setState(() {
         isLoading = false;
       });
