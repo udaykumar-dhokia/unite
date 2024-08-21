@@ -1,10 +1,15 @@
 import 'dart:async';
 
+import 'package:animated_text_kit/animated_text_kit.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:unite/auth/handler/handler.dart';
+import 'package:unite/auth/login/desktop_login.dart';
+import 'package:unite/constants/color/color.dart';
 import 'package:unite/firebase_options.dart';
 import 'package:window_manager/window_manager.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
@@ -36,11 +41,14 @@ class Splash extends StatefulWidget {
 }
 
 class _SplashState extends State<Splash> {
+  final List<String> _texts = ["Sync", "Harmony", "Flow"];
+  int _index = 0;
+
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
-    Timer(const Duration(seconds: 1), () {
+    Timer(const Duration(seconds: 2), () {
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(
@@ -52,9 +60,61 @@ class _SplashState extends State<Splash> {
 
   @override
   Widget build(BuildContext context) {
-    return const Scaffold(
-      body: Center(
-        child: Text("Unite."),
+    var width = MediaQuery.sizeOf(context).width;
+    var height = MediaQuery.sizeOf(context).height;
+    return Scaffold(
+      body: Row(
+        children: [
+          Align(
+              alignment: Alignment.centerLeft,
+              child: Container(
+                decoration: const BoxDecoration(
+                  color: AppColors.white,
+                  // borderRadius: BorderRadius.circular(20),
+                  // color: AppColors.white,
+                  // image: const DecorationImage(
+                  //     image: AssetImage("lib/assets/login_back3.jpg"),
+                  //     fit: BoxFit.cover,
+                  //     opacity: 0.9),
+                ),
+                width: width,
+                height: height,
+                child: Stack(
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.only(left: 15, bottom: 15),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.end,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Align(
+                            alignment: Alignment.bottomLeft,
+                            child: Text(
+                              "Unite.",
+                              style: GoogleFonts.epilogue(
+                                  color: AppColors.black,
+                                  fontSize: width * 0.04,
+                                  fontWeight: FontWeight.w600),
+                            ),
+                          ),
+
+                          //Tag line
+                          Row(
+                            children: [
+                              Text("Stay in Sync, Harmony, and Flow.",
+                                  style: GoogleFonts.epilogue(
+                                      fontSize: width * 0.015,
+                                      color: AppColors.black)),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+        ],
       ),
     );
   }
