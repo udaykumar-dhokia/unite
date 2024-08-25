@@ -14,6 +14,7 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:unite/auth/login/app_login.dart';
 import 'package:unite/auth/login/desktop_login.dart';
+import 'package:unite/components/sidepanel/sidepanel.dart';
 import 'package:unite/components/textfield/textfield.dart';
 import 'package:unite/constants/color/color.dart';
 import 'package:unite/pages/projects/desktop_projects.dart';
@@ -75,6 +76,7 @@ class _DesktopSignupState extends State<DesktopSignup> {
   Future<void> _pickBannerImage() async {
     FilePickerResult? result = await FilePicker.platform.pickFiles(
       type: FileType.image,
+      allowedExtensions: ['jpg', 'jpeg', 'png'],
     );
     if (result != null) {
       setState(() {
@@ -129,9 +131,13 @@ class _DesktopSignupState extends State<DesktopSignup> {
           .doc(data["username"])
           .set(data);
 
-      String fileName = 'profile_images/${data["username"]}/${DateTime.now().millisecondsSinceEpoch}.png';
+      String fileName = 'profile_images/${data["username"]}/${DateTime.now().millisecondsSinceEpoch}_profile.png';
+      String bannerName = 'profile_images/${data["username"]}/${DateTime.now().millisecondsSinceEpoch}_banner.png';
       Reference firebaseStorageRef =
           FirebaseStorage.instance.ref().child(fileName);
+
+          Reference firebaseStorageRef1 =
+          FirebaseStorage.instance.ref().child(bannerName);
       
 
       UploadTask uploadTask = firebaseStorageRef.putFile(
@@ -139,10 +145,18 @@ class _DesktopSignupState extends State<DesktopSignup> {
         SettableMetadata(contentType: 'image/png'),
       );
 
-      TaskSnapshot taskSnapshot = await uploadTask;
-      String downloadUrl = await taskSnapshot.ref.getDownloadURL();
+      UploadTask uploadTask1 = firebaseStorageRef1.putFile(
+        _bannerImage!,
+        SettableMetadata(contentType: 'image/png'),
+      );
 
-      await FirebaseFirestore.instance.collection("users").doc(data["username"]).update({"profileImage": downloadUrl});
+      TaskSnapshot taskSnapshot = await uploadTask;
+      TaskSnapshot taskSnapshot1 = await uploadTask1;
+      String downloadUrl = await taskSnapshot.ref.getDownloadURL();
+      String downloadUrl1 = await taskSnapshot1.ref.getDownloadURL();
+
+      await FirebaseFirestore.instance.collection("users").doc(data["username"]).update({"profileImage": downloadUrl, "bannerImage": downloadUrl1});
+      await FirebaseFirestore.instance.collection("users").doc(data["username"]).collection("Theme").doc("settings").set({"mode": false, "color": "0xFFFFC107"});
 
 
       setState(() {
@@ -166,7 +180,7 @@ class _DesktopSignupState extends State<DesktopSignup> {
               autoDismiss: true)
           .show(context);
       Navigator.pushReplacement(
-          context, MaterialPageRoute(builder: (context) => DesktopProjects()));
+          context, MaterialPageRoute(builder: (context) => SidePanel()));
     } catch (e) {
       setState(() {
         isLoading = false;
