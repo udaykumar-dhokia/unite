@@ -43,14 +43,14 @@ class _DesktopSettingsState extends State<DesktopSettings> {
         .doc(widget.userData!["username"])
         .collection("Theme")
         .doc("settings")
-        .update({"color": theme == "yellow" ? "0xFFFFC107" : theme == "green"? "0xFF4CAF50" : theme == "blue"? "0xFF2196F3" : "0xFFB00020"});
+        .update({"color": theme == "yellow" ? "0xFFFFC107" : theme == "green"? "0xFF4CAF50" : theme == "blue"? "0xFF2196F3" : "0xffAA00FF"});
 
     // Update the local state to reflect the theme change
     setState(() {
       selectedColor = theme;
       Provider.of<ThemeNotifier>(context, listen: false).updateAccentColor(
         Color(
-          theme == "yellow" ? 0xFFFFC107 : theme == "green"? 0xFF4CAF50 : theme == "blue"? 0xFF2196F3 : 0xFFB00020,
+          theme == "yellow" ? 0xFFFFC107 : theme == "green"? 0xFF4CAF50 : theme == "blue"? 0xFF2196F3 : 0xffAA00FF,
         ),
       );
     });
@@ -61,13 +61,15 @@ class _DesktopSettingsState extends State<DesktopSettings> {
     // TODO: implement initState
     super.initState();
     selectedTheme = widget.themeData!["mode"] ? "dark" : "light";
-    selectedColor = widget.themeData!["color"] == "0xFFFFC107" ? "yellow" : widget.themeData!["color"] == "0xFF4CAF50"? "green": widget.themeData!["color"] == "0xFF2196F3"? "blue": "red";
+    selectedColor = widget.themeData!["color"] == "0xFFFFC107" ? "yellow" : widget.themeData!["color"] == "0xFF4CAF50"? "green": widget.themeData!["color"] == "0xFF2196F3"? "blue": "purple";
   }
 
   @override
   Widget build(BuildContext context) {
     var width = MediaQuery.sizeOf(context).width;
     var height = MediaQuery.sizeOf(context).height;
+    Color accentColor = Provider.of<ThemeNotifier>(context).accentColor;
+    String selectedAccent = accentColor==Color(0xffAA00FF) ? "purple" : accentColor==Color(0xFF4CAF50) ? "green" : accentColor == Color(0xFFFFC107)? "yellow" : "blue";
 
     return Scaffold(
       backgroundColor:
@@ -143,7 +145,7 @@ class _DesktopSettingsState extends State<DesktopSettings> {
                         child: CircleAvatar(
                           radius: 18,
                           backgroundColor: AppColors.warningColor,
-                          child: selectedColor == "yellow"
+                          child: selectedAccent == "yellow"
                               ? const Icon(Icons.check)
                               : null,
                         ),
@@ -161,7 +163,7 @@ class _DesktopSettingsState extends State<DesktopSettings> {
                         child: CircleAvatar(
                           radius: 18,
                           backgroundColor: AppColors.successColor,
-                          child: selectedColor == "green"
+                          child: selectedAccent == "green"
                               ? const Icon(Icons.check)
                               : null,
                         ),
@@ -179,7 +181,7 @@ class _DesktopSettingsState extends State<DesktopSettings> {
                         child: CircleAvatar(
                           radius: 18,
                           backgroundColor: AppColors.infoColor,
-                          child: selectedColor == "blue"
+                          child: selectedAccent == "blue"
                               ? const Icon(Icons.check)
                               : null,
                         ),
@@ -190,15 +192,15 @@ class _DesktopSettingsState extends State<DesktopSettings> {
                       GestureDetector(
                         onTap: () {
                           setState(() {
-                            selectedColor = "red";
+                            selectedColor = "purple";
                           });
-                          changeColor("red");
+                          changeColor("purple");
                         },
                         child: CircleAvatar(
                           radius: 18,
                           backgroundColor:
-                              AppColors.errorColor.withOpacity(0.8),
-                          child: selectedColor == "red"
+                              AppColors.purple,
+                          child: selectedAccent == "purple"
                               ? const Icon(Icons.check)
                               : null,
                         ),

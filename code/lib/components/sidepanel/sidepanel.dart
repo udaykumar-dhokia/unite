@@ -107,7 +107,7 @@ class _SidePanelState extends State<SidePanel> {
                     // onEnter: (_) => _onHover(true),
                     // onExit: (_) => _onHover(false),
                     child: AnimatedContainer(
-                      duration: const Duration(milliseconds: 200),
+                      duration: const Duration(milliseconds: 0),
                       width: !_isHovered ? width * 0.04 : width * 0.1,
                       height: double.infinity,
                       decoration: BoxDecoration(
@@ -536,6 +536,7 @@ class _SidePanelState extends State<SidePanel> {
                                   )
                                 : DesktopTeams(),
                   ),
+                
                 ],
               ),
             ),
