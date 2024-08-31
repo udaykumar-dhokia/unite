@@ -13,7 +13,6 @@ import 'package:unite/auth/signup/desktop_signup.dart';
 import 'package:unite/components/sidepanel/sidepanel.dart';
 import 'package:unite/components/textfield/textfield.dart';
 import 'package:unite/constants/color/color.dart';
-import 'package:unite/pages/projects/desktop_projects.dart';
 import 'package:unite/responsive/layout/responsive_layout.dart';
 
 class DesktopLogin extends StatefulWidget {
@@ -53,7 +52,7 @@ class _DesktopLoginState extends State<DesktopLogin> {
       setState(() {
         isLoading = true;
       });
-      final credentials = await FirebaseAuth.instance
+      await FirebaseAuth.instance
           .signInWithEmailAndPassword(email: email, password: password);
 
       setState(() {

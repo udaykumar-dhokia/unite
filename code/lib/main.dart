@@ -1,15 +1,14 @@
 import 'dart:async';
 
-import 'package:animated_text_kit/animated_text_kit.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:provider/provider.dart';
 import 'package:unite/auth/handler/handler.dart';
-import 'package:unite/auth/login/desktop_login.dart';
 import 'package:unite/constants/color/color.dart';
+import 'package:unite/constants/theme/themehandler.dart';
 import 'package:unite/firebase_options.dart';
 import 'package:window_manager/window_manager.dart';
-import 'package:flutter/foundation.dart' show kIsWeb;
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
@@ -20,7 +19,9 @@ void main() {
     await windowManager.show();
     await windowManager.focus();
   });
-  runApp(MobileApp());
+  runApp(ChangeNotifierProvider(
+          create: (context) => ThemeNotifier(false, AppColors.warningColor),
+    child: MobileApp()));
 }
 
 class MobileApp extends StatelessWidget {
@@ -41,9 +42,6 @@ class Splash extends StatefulWidget {
 }
 
 class _SplashState extends State<Splash> {
-  final List<String> _texts = ["Sync", "Harmony", "Flow"];
-  int _index = 0;
-
   @override
   void initState() {
     // TODO: implement initState
@@ -70,12 +68,6 @@ class _SplashState extends State<Splash> {
               child: Container(
                 decoration: const BoxDecoration(
                   color: AppColors.white,
-                  // borderRadius: BorderRadius.circular(20),
-                  // color: AppColors.white,
-                  // image: const DecorationImage(
-                  //     image: AssetImage("lib/assets/login_back3.jpg"),
-                  //     fit: BoxFit.cover,
-                  //     opacity: 0.9),
                 ),
                 width: width,
                 height: height,

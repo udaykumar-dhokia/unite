@@ -5,7 +5,6 @@ import 'package:unite/auth/login/desktop_login.dart';
 import 'package:unite/components/sidepanel/sidepanel.dart';
 import 'package:unite/constants/color/color.dart';
 import 'package:unite/pages/projects/app_projects.dart';
-import 'package:unite/pages/projects/desktop_projects.dart';
 import 'package:unite/responsive/layout/responsive_layout.dart';
 
 class Auth extends StatelessWidget {

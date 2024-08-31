@@ -6,6 +6,7 @@ class AppColors {
   static const Color black = Colors.black;
   static const Color transparent = Colors.transparent;
   static const Color dark = Color(0xff1d1d1d);
+  static const Color purple = Color(0xffAA00FF);
 
   // Error color
   static const Color errorColor = Color(0xFFB00020);

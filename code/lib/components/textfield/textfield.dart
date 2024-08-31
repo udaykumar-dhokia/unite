@@ -2,7 +2,9 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
+import 'package:provider/provider.dart';
 import 'package:unite/constants/color/color.dart';
+import 'package:unite/constants/theme/themehandler.dart';
 
 class CustomTextFormField extends StatefulWidget {
   final TextEditingController? controller;
@@ -21,6 +23,7 @@ class CustomTextFormField extends StatefulWidget {
   final int? maxLines;
   final bool enabled;
   final bool? isDark;
+  final bool? readOnly;
   final TextInputAction? textInputAction;
 
   const CustomTextFormField({
@@ -41,6 +44,7 @@ class CustomTextFormField extends StatefulWidget {
     this.maxLines = 1,
     this.enabled = true,
     this.textInputAction,
+    this.readOnly = false,
     this.suffix,
   }) : super(key: key);
 
@@ -71,13 +75,15 @@ class _CustomTextFormFieldState extends State<CustomTextFormField> {
 
   @override
   Widget build(BuildContext context) {
+    Color accentColor = Provider.of<ThemeNotifier>(context).accentColor;
+
     return TextFormField(
-      readOnly: widget.labelText == "Date of Birth" ? true : false,
+      readOnly: widget.labelText == "Date of Birth" ? true : widget.readOnly!,
       style: GoogleFonts.epilogue(
           color: !widget.isDark! ? AppColors.black : AppColors.white),
       controller: widget.controller,
       initialValue: widget.initialValue,
-      cursorColor: AppColors.warningColor,
+      cursorColor: accentColor,
       obscureText: widget.labelText == "Password"
           ? isVisible
               ? false
@@ -90,7 +96,7 @@ class _CustomTextFormFieldState extends State<CustomTextFormField> {
       textInputAction: widget.textInputAction,
       decoration: InputDecoration(
         labelStyle: GoogleFonts.epilogue(
-            color: !widget.isDark! ? AppColors.black : AppColors.white),
+            color: !widget.isDark! ? AppColors.black : AppColors.white.withOpacity(0.4)),
         labelText: widget.labelText,
         hintText: widget.hintText,
         prefixIcon: widget.prefixIcon != null
@@ -132,13 +138,30 @@ class _CustomTextFormFieldState extends State<CustomTextFormField> {
                       }
                     },
                     icon: Icon(widget.suffixIcon))
-                : widget.suffixIcon != null
+                : widget.labelText=="Deadline"?
+                    IconButton(
+                    onPressed: () async {
+                      DateTime? pickedDate = await showDatePicker(
+                          context: context,
+                          firstDate: DateTime.now(),
+                          lastDate: DateTime(2100));
+
+                      if (pickedDate != null) {
+                        String formattedDate =
+                            DateFormat('dd-MM-yyyy').format(pickedDate);
+                        setState(() {
+                          widget.controller?.text = formattedDate;
+                        });
+                      }
+                    },
+                    icon: Icon(widget.suffixIcon)) :
+                     widget.suffixIcon != null
                     ? Icon(
                         widget.suffixIcon,
                         color:
                             !widget.isDark! ? AppColors.black : AppColors.white,
                       )
-                    : null,
+                    :  null,
         border: const UnderlineInputBorder(),
         enabledBorder: const UnderlineInputBorder(),
         focusedBorder: const UnderlineInputBorder(),
