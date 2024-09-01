@@ -19,3 +19,15 @@ Getting Started
 https://github.com/udaykumar-dhokia/unite.git
 cd unite
 ```
+
+2. Download the dependencies:
+
+```
+flutter pub get
+```
+
+3. Run the project:
+
+```
+flutter run
+```
