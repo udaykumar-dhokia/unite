@@ -1,7 +1,11 @@
+import 'dart:io';
+
 import 'package:cherry_toast/cherry_toast.dart';
 import 'package:cherry_toast/resources/arrays.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:file_picker/file_picker.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:hugeicons/hugeicons.dart';
@@ -21,22 +25,74 @@ class Discussion extends StatefulWidget {
 
 class _DiscussionState extends State<Discussion> {
   TextEditingController msg = TextEditingController();
+  File? _Image;
+
+  Future<void> _pickImage() async {
+    FilePickerResult? result = await FilePicker.platform.pickFiles(
+      type: FileType.custom,
+      allowedExtensions: ['jpg', 'jpeg', 'png'],
+    );
+    if (result != null) {
+      print(result);
+      setState(() {
+        _Image = File(result.files.single.path!);
+      });
+    } else {
+      // User canceled the picker
+      print("No file selected");
+    }
+  }
 
   Future<void> sendMsg(String message) async {
-    await FirebaseFirestore.instance
-        .collection('projects')
-        .doc(widget.id)
-        .collection('chat')
-        .add({
-      'name': widget.userData["name"],
-      'username': widget.userData['username'],
-      'time': Timestamp.now(),
-      'message': message,
-    }).then((value) {
-      msg.clear();
-    }).catchError((error) {
-      print(error.message);
-    });
+    if (_Image != null) {
+      String fileName =
+          'chat_images/${widget.id}/${widget.userData["email"]}/${DateTime.now().millisecondsSinceEpoch}.png';
+
+      Reference firebaseStorageRef =
+          FirebaseStorage.instance.ref().child(fileName);
+
+      UploadTask uploadTask = firebaseStorageRef.putFile(
+        _Image!,
+        SettableMetadata(contentType: 'image/png'),
+      );
+
+      TaskSnapshot taskSnapshot = await uploadTask;
+      String downloadUrl = await taskSnapshot.ref.getDownloadURL();
+
+      await FirebaseFirestore.instance
+          .collection('projects')
+          .doc(widget.id)
+          .collection('chat')
+          .add({
+        'name': widget.userData["name"],
+        'username': widget.userData['username'],
+        'time': Timestamp.now(),
+        'message': message,
+        'image': downloadUrl
+      }).then((value) {
+        msg.clear();
+        setState(() {
+          _Image = null;
+        });
+      }).catchError((error) {
+        print(error.message);
+      });
+    } else {
+      await FirebaseFirestore.instance
+          .collection('projects')
+          .doc(widget.id)
+          .collection('chat')
+          .add({
+        'name': widget.userData["name"],
+        'username': widget.userData['username'],
+        'time': Timestamp.now(),
+        'message': message,
+      }).then((value) {
+        msg.clear();
+      }).catchError((error) {
+        print(error.message);
+      });
+    }
   }
 
   @override
@@ -72,16 +128,38 @@ class _DiscussionState extends State<Discussion> {
       ),
       bottomNavigationBar: Row(
         children: [
+          IconButton(
+            icon: const Icon(Icons.add),
+            onPressed: _pickImage,
+            color: theme ? AppColors.white : AppColors.black,
+          ),
           Expanded(
             child: TextFormField(
               maxLines: 10,
               minLines: 1,
               controller: msg,
-              style: GoogleFonts.epilogue(),
+              style: GoogleFonts.epilogue(
+                color: theme ? AppColors.black : AppColors.white,
+              ),
               cursorColor: theme ? AppColors.dark : AppColors.white,
               decoration: InputDecoration(
                 filled: true,
                 fillColor: theme ? AppColors.white : AppColors.dark,
+                prefixIcon: _Image != null
+                    ? Container(
+                        margin: const EdgeInsets.all(10),
+                        height: _Image != null ? 50 : 0,
+                        width: _Image != null ? 100 : 0,
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(15),
+                          image: _Image != null
+                              ? DecorationImage(
+                                  image: FileImage(_Image!),
+                                )
+                              : null,
+                        ),
+                      )
+                    : null,
                 focusedBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(10),
                   borderSide: BorderSide(
@@ -172,6 +250,8 @@ class _DiscussionState extends State<Discussion> {
                       snapshot.data!.docs[index];
                   bool isCurrentUser = documentSnapshot['username'] ==
                       widget.userData["username"];
+                  var data = documentSnapshot.data() as Map<String, dynamic>;
+                  bool hasImage = data.containsKey('image');
 
                   return Flexible(
                     child: Container(
@@ -198,7 +278,9 @@ class _DiscussionState extends State<Discussion> {
                                 style: GoogleFonts.epilogue(
                                   color: isCurrentUser
                                       ? accentColor
-                                      : AppColors.white,
+                                      : theme
+                                          ? AppColors.white
+                                          : AppColors.black,
                                   fontWeight: FontWeight.bold,
                                 ),
                               ),
@@ -207,15 +289,64 @@ class _DiscussionState extends State<Discussion> {
                                 child: Text(
                                     "@${documentSnapshot["username"]}  ${DateFormat('hh:mm a').format((documentSnapshot['time'] as Timestamp).toDate())}",
                                     style: GoogleFonts.epilogue(
-                                        color: Colors.grey[400])),
+                                        color: theme
+                                            ? AppColors.white
+                                            : AppColors.black)),
                               )
                             ],
                           ),
                           Container(
                               margin: const EdgeInsets.only(top: 5.0),
-                              child: Text(documentSnapshot['message'],
-                                  style: GoogleFonts.epilogue(
-                                      color: Colors.white))),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  if (hasImage)
+                                    GestureDetector(
+                                      onTap: () {
+                                        showDialog(
+                                          context: context,
+                                          builder: (context) => Dialog(
+                                            child: Container(
+                                              decoration: BoxDecoration(
+                                                borderRadius:
+                                                    BorderRadius.circular(15),
+                                                image: DecorationImage(
+                                                  image: NetworkImage(
+                                                      documentSnapshot[
+                                                          "image"]),
+                                                  fit: BoxFit.contain,
+                                                ),
+                                              ),
+                                            ),
+                                          ),
+                                        );
+                                      },
+                                      child: Container(
+                                        margin: const EdgeInsets.only(
+                                            top: 10, bottom: 10),
+                                        height: 50,
+                                        width: 100,
+                                        decoration: BoxDecoration(
+                                          borderRadius:
+                                              BorderRadius.circular(15),
+                                          image: DecorationImage(
+                                            image: NetworkImage(
+                                                documentSnapshot["image"]),
+                                            fit: BoxFit.contain,
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                  Text(
+                                    documentSnapshot['message'],
+                                    style: GoogleFonts.epilogue(
+                                      color: theme
+                                          ? AppColors.white
+                                          : AppColors.black,
+                                    ),
+                                  ),
+                                ],
+                              )),
                           // Container(
                           //   margin: const EdgeInsets.only(top: 10.0),
                           //   child: Row(

@@ -413,8 +413,9 @@ class _DesktopProjectsState extends State<DesktopProjects> {
                           }
 
                           return Container(
-                            height: MediaQuery.of(context).size.height - 200,
+                            // height: MediaQuery.of(context).size.height - 200,
                             child: GridView.builder(
+                              shrinkWrap: true,
                               padding: const EdgeInsets.all(8.0),
                               itemCount: filteredProjects.length,
                               gridDelegate:
@@ -523,7 +524,7 @@ class _DesktopProjectsState extends State<DesktopProjects> {
                                                 CrossAxisAlignment.start,
                                             children: [
                                               Text(
-                                                "Description: ${data['description']}",
+                                                "Description: ${data['description'].length > 20 ? data["description"].substring(0, 20) + "..." : data["description"]}",
                                                 style: GoogleFonts.epilogue(
                                                   color: Colors.grey[600],
                                                   fontSize: 14,

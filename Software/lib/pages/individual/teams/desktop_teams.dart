@@ -206,10 +206,10 @@ class _DesktopTeamsState extends State<DesktopTeams> {
                             itemBuilder: (context, index) {
                               Map<String, dynamic> data =
                                   Teams[index].data() as Map<String, dynamic>;
-                          
+
                               List<dynamic> members = data['members'] ?? [];
                               List<Widget> memberPhotos = [];
-                          
+
                               for (String member in members) {
                                 memberPhotos.add(
                                   FutureBuilder<DocumentSnapshot>(
@@ -225,7 +225,7 @@ class _DesktopTeamsState extends State<DesktopTeams> {
                                           backgroundColor: Colors.grey,
                                         );
                                       }
-                          
+
                                       if (memberSnapshot.hasError ||
                                           !memberSnapshot.hasData ||
                                           !memberSnapshot.data!.exists) {
@@ -234,13 +234,13 @@ class _DesktopTeamsState extends State<DesktopTeams> {
                                           backgroundColor: Colors.grey,
                                         );
                                       }
-                          
+
                                       Map<String, dynamic> memberData =
                                           memberSnapshot.data!.data()
                                               as Map<String, dynamic>;
                                       String profileUrl =
                                           memberData['profileImage'] ?? '';
-                          
+
                                       return CircleAvatar(
                                         radius: 15,
                                         backgroundImage: profileUrl.isNotEmpty
@@ -252,7 +252,7 @@ class _DesktopTeamsState extends State<DesktopTeams> {
                                   ),
                                 );
                               }
-                          
+
                               return Card(
                                 color: theme ? Colors.black54 : Colors.white,
                                 elevation: 4,
@@ -263,7 +263,8 @@ class _DesktopTeamsState extends State<DesktopTeams> {
                                   padding: const EdgeInsets.all(16.0),
                                   child: Column(
                                     mainAxisAlignment: MainAxisAlignment.center,
-                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
                                     children: [
                                       Text(
                                         data['name'] ?? 'No name',

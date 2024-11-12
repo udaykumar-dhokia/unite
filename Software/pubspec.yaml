@@ -55,6 +55,7 @@ dependencies:
   fluid_dialog: ^2.0.0
   calendar_view: ^1.2.0
   syncfusion_flutter_calendar: ^26.2.12
+  image_picker: ^1.1.2
 
 dev_dependencies:
   flutter_test:
