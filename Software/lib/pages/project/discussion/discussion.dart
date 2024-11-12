@@ -253,151 +253,147 @@ class _DiscussionState extends State<Discussion> {
                   var data = documentSnapshot.data() as Map<String, dynamic>;
                   bool hasImage = data.containsKey('image');
 
-                  return Flexible(
-                    child: Container(
-                      decoration: const BoxDecoration(
-                        border: Border(
-                          left: BorderSide(
-                            width: 1,
-                            color: AppColors.grey,
-                          ),
+                  return Container(
+                    decoration: const BoxDecoration(
+                      border: Border(
+                        left: BorderSide(
+                          width: 1,
+                          color: AppColors.grey,
                         ),
                       ),
-                      margin: const EdgeInsets.only(
-                          left: 10.0, right: 10, bottom: 10),
-                      padding: const EdgeInsets.only(left: 10),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        mainAxisAlignment: MainAxisAlignment.start,
-                        children: <Widget>[
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: <Widget>[
-                              Text(
-                                documentSnapshot["name"],
-                                style: GoogleFonts.epilogue(
-                                  color: isCurrentUser
-                                      ? accentColor
-                                      : theme
-                                          ? AppColors.white
-                                          : AppColors.black,
-                                  fontWeight: FontWeight.bold,
-                                ),
+                    ),
+                    margin: const EdgeInsets.only(
+                        left: 10.0, right: 10, bottom: 10),
+                    padding: const EdgeInsets.only(left: 10),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      children: <Widget>[
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: <Widget>[
+                            Text(
+                              documentSnapshot["name"],
+                              style: GoogleFonts.epilogue(
+                                color: isCurrentUser
+                                    ? accentColor
+                                    : theme
+                                        ? AppColors.white
+                                        : AppColors.black,
+                                fontWeight: FontWeight.bold,
                               ),
-                              Container(
-                                margin: const EdgeInsets.only(left: 5.0),
-                                child: Text(
-                                    "@${documentSnapshot["username"]}  ${DateFormat('hh:mm a').format((documentSnapshot['time'] as Timestamp).toDate())}",
-                                    style: GoogleFonts.epilogue(
-                                        color: theme
-                                            ? AppColors.white
-                                            : AppColors.black)),
-                              )
-                            ],
-                          ),
-                          Container(
-                              margin: const EdgeInsets.only(top: 5.0),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  if (hasImage)
-                                    GestureDetector(
-                                      onTap: () {
-                                        showDialog(
-                                          context: context,
-                                          builder: (context) => Dialog(
-                                            child: Container(
-                                              decoration: BoxDecoration(
-                                                borderRadius:
-                                                    BorderRadius.circular(15),
-                                                image: DecorationImage(
-                                                  image: NetworkImage(
-                                                      documentSnapshot[
-                                                          "image"]),
-                                                  fit: BoxFit.contain,
-                                                ),
+                            ),
+                            Container(
+                              margin: const EdgeInsets.only(left: 5.0),
+                              child: Text(
+                                  "@${documentSnapshot["username"]}  ${DateFormat('hh:mm a').format((documentSnapshot['time'] as Timestamp).toDate())}",
+                                  style: GoogleFonts.epilogue(
+                                      color: theme
+                                          ? AppColors.white
+                                          : AppColors.black)),
+                            )
+                          ],
+                        ),
+                        Container(
+                            margin: const EdgeInsets.only(top: 5.0),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                if (hasImage)
+                                  GestureDetector(
+                                    onTap: () {
+                                      showDialog(
+                                        context: context,
+                                        builder: (context) => Dialog(
+                                          child: Container(
+                                            decoration: BoxDecoration(
+                                              borderRadius:
+                                                  BorderRadius.circular(15),
+                                              image: DecorationImage(
+                                                image: NetworkImage(
+                                                    documentSnapshot["image"]),
+                                                fit: BoxFit.contain,
                                               ),
                                             ),
                                           ),
-                                        );
-                                      },
-                                      child: Container(
-                                        margin: const EdgeInsets.only(
-                                            top: 10, bottom: 10),
-                                        height: 50,
-                                        width: 100,
-                                        decoration: BoxDecoration(
-                                          borderRadius:
-                                              BorderRadius.circular(15),
-                                          image: DecorationImage(
-                                            image: NetworkImage(
-                                                documentSnapshot["image"]),
-                                            fit: BoxFit.contain,
-                                          ),
+                                        ),
+                                      );
+                                    },
+                                    child: Container(
+                                      margin: const EdgeInsets.only(
+                                          top: 10, bottom: 10),
+                                      height: 50,
+                                      width: 100,
+                                      decoration: BoxDecoration(
+                                        borderRadius: BorderRadius.circular(15),
+                                        image: DecorationImage(
+                                          image: NetworkImage(
+                                              documentSnapshot["image"]),
+                                          fit: BoxFit.contain,
                                         ),
                                       ),
                                     ),
-                                  Text(
-                                    documentSnapshot['message'],
-                                    style: GoogleFonts.epilogue(
-                                      color: theme
-                                          ? AppColors.white
-                                          : AppColors.black,
-                                    ),
                                   ),
-                                ],
-                              )),
-                          // Container(
-                          //   margin: const EdgeInsets.only(top: 10.0),
-                          //   child: Row(
-                          //     mainAxisAlignment:
-                          //         MainAxisAlignment.spaceBetween,
-                          //     children: <Widget>[
-                          //       Row(
-                          //         children: <Widget>[
-                          //           const Icon(Icons.message,
-                          //               color: Colors.white),
-                          //           Container(
-                          //             margin:
-                          //                 const EdgeInsets.only(left: 3.0),
-                          //             child: const Text("15",
-                          //                 style: TextStyle(
-                          //                     color: Colors.white)),
-                          //           )
-                          //         ],
-                          //       ),
-                          //       Row(
-                          //         children: <Widget>[
-                          //           const Icon(Icons.repeat,
-                          //               color: Colors.white),
-                          //           Container(
-                          //             margin:
-                          //                 const EdgeInsets.only(left: 3.0),
-                          //             child: const Text("15",
-                          //                 style: TextStyle(
-                          //                     color: Colors.white)),
-                          //           )
-                          //         ],
-                          //       ),
-                          //       Row(
-                          //         children: <Widget>[
-                          //           const Icon(Icons.favorite_border,
-                          //               color: Colors.white),
-                          //           Container(
-                          //             margin:
-                          //                 const EdgeInsets.only(left: 3.0),
-                          //             child: const Text("15",
-                          //                 style: TextStyle(
-                          //                     color: Colors.white)),
-                          //           )
-                          //         ],
-                          //       ),
-                          //       const Icon(Icons.share, color: Colors.white)
-                          //     ],
-                          //   ),
-                          // )
-                        ],
-                      ),
+                                Text(
+                                  documentSnapshot['message'],
+                                  style: GoogleFonts.epilogue(
+                                    color: theme
+                                        ? AppColors.white
+                                        : AppColors.black,
+                                  ),
+                                ),
+                              ],
+                            )),
+                        // Container(
+                        //   margin: const EdgeInsets.only(top: 10.0),
+                        //   child: Row(
+                        //     mainAxisAlignment:
+                        //         MainAxisAlignment.spaceBetween,
+                        //     children: <Widget>[
+                        //       Row(
+                        //         children: <Widget>[
+                        //           const Icon(Icons.message,
+                        //               color: Colors.white),
+                        //           Container(
+                        //             margin:
+                        //                 const EdgeInsets.only(left: 3.0),
+                        //             child: const Text("15",
+                        //                 style: TextStyle(
+                        //                     color: Colors.white)),
+                        //           )
+                        //         ],
+                        //       ),
+                        //       Row(
+                        //         children: <Widget>[
+                        //           const Icon(Icons.repeat,
+                        //               color: Colors.white),
+                        //           Container(
+                        //             margin:
+                        //                 const EdgeInsets.only(left: 3.0),
+                        //             child: const Text("15",
+                        //                 style: TextStyle(
+                        //                     color: Colors.white)),
+                        //           )
+                        //         ],
+                        //       ),
+                        //       Row(
+                        //         children: <Widget>[
+                        //           const Icon(Icons.favorite_border,
+                        //               color: Colors.white),
+                        //           Container(
+                        //             margin:
+                        //                 const EdgeInsets.only(left: 3.0),
+                        //             child: const Text("15",
+                        //                 style: TextStyle(
+                        //                     color: Colors.white)),
+                        //           )
+                        //         ],
+                        //       ),
+                        //       const Icon(Icons.share, color: Colors.white)
+                        //     ],
+                        //   ),
+                        // )
+                      ],
                     ),
                   );
                 },
