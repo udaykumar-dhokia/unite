@@ -1,5 +1,10 @@
 # Project Management System
 
+[![Flutter Version](https://img.shields.io/badge/Flutter-^3.0-blue.svg)](https://flutter.dev)
+[![Firebase](https://img.shields.io/badge/Firebase-Enabled-orange.svg)](https://firebase.google.com/)
+[![Pub.dev](https://img.shields.io/badge/pub.dev-Packages-blue.svg)](https://pub.dev/)
+[![License](https://img.shields.io/badge/License-MIT-brightgreen.svg)](LICENSE)
+
 The Project Management System is a robust and comprehensive solution crafted to streamline project management, helping teams manage, track, and complete projects efficiently. Built using Flutter and Firebase, this application empowers users to oversee every aspect of their projects, from creating and assigning tasks to tracking progress and collaborating with team members. By leveraging Flutter's powerful UI capabilities and Firebase's secure, real-time backend, the system ensures that teams can work together seamlessly, delivering projects on time and within budget.
 
 ## Key Features
@@ -82,7 +87,9 @@ The Project Management System is organized in a way that promotes modularity and
 
 Special thanks to all the amazing contributors who have helped bring this project to life!
 
-![GitHub Contributors](https://img.shields.io/github/contributors/udaykumar-dhokia/unite)
+<a href="https://github.com/udaykumar-dhokia/unite/graphs/contributors">
+  <img src="https://contrib.rocks/image?repo=udaykumar-dhokia/unite" />
+</a>
 
 We welcome additional contributions and feedback. If you would like to contribute, please reach out or submit a pull request.
 
