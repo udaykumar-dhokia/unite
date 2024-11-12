@@ -82,7 +82,7 @@ The Project Management System is organized in a way that promotes modularity and
 
 Special thanks to all the amazing contributors who have helped bring this project to life!
 
-[View Contributors](https://github.com/udaykumar-dhokia/unite/graphs/contributors)
+![GitHub Contributors](https://img.shields.io/github/contributors/udaykumar-dhokia/unite)
 
 We welcome additional contributions and feedback. If you would like to contribute, please reach out or submit a pull request.
 
