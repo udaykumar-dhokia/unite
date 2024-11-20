@@ -14,6 +14,7 @@ import 'package:unite/pages/individual/profile/desktop_profile.dart';
 import 'package:unite/pages/individual/projects/desktop_projects.dart';
 import 'package:unite/pages/individual/settings/desktop_settings.dart';
 import 'package:unite/pages/individual/teams/desktop_teams.dart';
+import 'package:unite/pages/individual/uniteai/uniteai.dart';
 import 'package:unite/pages/project/calendar/project_calendar.dart';
 import 'package:unite/pages/project/dashboard/dashboard.dart';
 import 'package:unite/pages/project/discussion/discussion.dart';
@@ -62,6 +63,7 @@ class _ProjectSidePanelState extends State<ProjectSidePanel> {
         .doc("settings")
         .get();
 
+    print(theme.data());
     setState(() {
       themeData = theme.data();
       // isDark = themeData!["mode"];
@@ -348,6 +350,85 @@ class _ProjectSidePanelState extends State<ProjectSidePanel> {
                                     ],
                                   ),
                                 ),
+                                const SizedBox(
+                                  height: 20,
+                                ),
+                                GestureDetector(
+                                  onTap: () {
+                                    setState(() {
+                                      page = "uniteai";
+                                    });
+                                  },
+                                  child: Row(
+                                    mainAxisAlignment: _isHovered
+                                        ? MainAxisAlignment.start
+                                        : MainAxisAlignment.center,
+                                    children: [
+                                      Stack(
+                                        clipBehavior: Clip.none,
+                                        children: [
+                                          HugeIcon(
+                                            size: 22,
+                                            icon: HugeIcons
+                                                .strokeRoundedGoogleGemini,
+                                            color: page == "uniteai"
+                                                ? accent
+                                                : !isDark
+                                                    ? AppColors.dark
+                                                    : AppColors.grey,
+                                          ),
+                                          Positioned(
+                                            top:
+                                                -10, // Place "new" above the icon
+                                            left:
+                                                10, // Center align with the icon
+                                            child: Container(
+                                              padding:
+                                                  const EdgeInsets.symmetric(
+                                                      horizontal: 4,
+                                                      vertical: 2),
+                                              decoration: BoxDecoration(
+                                                color: accent,
+                                                borderRadius:
+                                                    BorderRadius.circular(4),
+                                              ),
+                                              child: Text(
+                                                "new",
+                                                style: GoogleFonts.epilogue(
+                                                  color: Colors.white,
+                                                  fontSize:
+                                                      8, // Small font for the badge
+                                                  fontWeight: FontWeight.w300,
+                                                ),
+                                              ),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                      if (_isHovered && _isTextVisible)
+                                        const SizedBox(
+                                          width: 10,
+                                        ),
+                                      if (_isHovered && _isTextVisible)
+                                        Stack(
+                                          clipBehavior: Clip.none,
+                                          children: [
+                                            Text(
+                                              "unite.ai",
+                                              style: GoogleFonts.epilogue(
+                                                color: page == "uniteai"
+                                                    ? accent
+                                                    : isDark
+                                                        ? AppColors.white
+                                                        : AppColors.black,
+                                                fontSize: width * 0.009,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                    ],
+                                  ),
+                                ),
                               ],
                             ),
                             Column(
@@ -542,20 +623,32 @@ class _ProjectSidePanelState extends State<ProjectSidePanel> {
                     width:
                         !_isHovered ? (width * 0.94) - 20 : (width * 0.9) - 20,
                     child: page == "home"
-                        ? Dashboard()
+                        ? Dashboard(
+                            id: widget.id,
+                            userData: userData,
+                          )
                         : page == "chat"
                             ? Discussion(
                                 id: widget.id,
                                 userData: userData!,
                               )
                             : page == "calendar"
-                                ? DesktopSettings(
+                                ? ProjectCalendar(
+                                  id: widget.id,
                                     userData: userData,
                                     themeData: themeData,
                                   )
                                 : page == "calendar"
-                                    ? ProjectCalendar()
-                                    : Drive(),
+                                    ? ProjectCalendar(
+                                      userData: userData,
+                                      themeData: themeData,
+                                      id: widget.id,
+                                    )
+                                    : page == "uniteai"? CodeUtilitiesHome(themeData: themeData, userData: userData) : Drive(
+                                      id: widget.id,
+                                userData: userData!,
+
+                                    ),
                   ),
                 ],
               ),

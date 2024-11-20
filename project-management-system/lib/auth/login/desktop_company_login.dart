@@ -11,6 +11,7 @@ import 'package:pinput/pinput.dart';
 import 'package:unite/auth/signup/app_signup.dart';
 import 'package:unite/auth/signup/desktop_company_signup.dart';
 import 'package:unite/auth/signup/desktop_signup.dart';
+import 'package:unite/components/sidepanel/company_sidepanel.dart';
 import 'package:unite/components/sidepanel/sidepanel.dart';
 import 'package:unite/components/textfield/textfield.dart';
 import 'package:unite/constants/color/color.dart';
@@ -77,7 +78,11 @@ class _DesktopCompanyLoginState extends State<DesktopCompanyLogin> {
               autoDismiss: true)
           .show(context);
       Navigator.pushReplacement(
-          context, MaterialPageRoute(builder: (context) => const SidePanel()));
+        context,
+        MaterialPageRoute(
+          builder: (context) => const CompanySidePanel(),
+        ),
+      );
     } catch (e) {
       setState(() {
         isLoading = false;

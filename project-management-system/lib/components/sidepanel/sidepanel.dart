@@ -14,6 +14,7 @@ import 'package:unite/pages/individual/profile/desktop_profile.dart';
 import 'package:unite/pages/individual/projects/desktop_projects.dart';
 import 'package:unite/pages/individual/settings/desktop_settings.dart';
 import 'package:unite/pages/individual/teams/desktop_teams.dart';
+import 'package:unite/pages/individual/uniteai/uniteai.dart';
 
 class SidePanel extends StatefulWidget {
   const SidePanel({super.key});
@@ -32,7 +33,7 @@ class _SidePanelState extends State<SidePanel> {
   bool _isHovered = false;
   bool _isTextVisible = false;
   Timer? _hoverTimer;
-  String page = "home";
+  String page = "uniteai";
 
   void getDetails() async {
     setState(() {
@@ -225,7 +226,7 @@ class _SidePanelState extends State<SidePanel> {
                                 GestureDetector(
                                   onTap: () {
                                     setState(() {
-                                      page = "team";
+                                      page = "teams";
                                     });
                                   },
                                   child: Row(
@@ -236,7 +237,7 @@ class _SidePanelState extends State<SidePanel> {
                                       HugeIcon(
                                         size: 22,
                                         icon: HugeIcons.strokeRoundedUserGroup,
-                                        color: page == "team"
+                                        color: page == "teams"
                                             ? accent
                                             : !isDark
                                                 ? AppColors.dark
@@ -250,7 +251,7 @@ class _SidePanelState extends State<SidePanel> {
                                         Text(
                                           "Teams",
                                           style: GoogleFonts.epilogue(
-                                              color: page == "team"
+                                              color: page == "teams"
                                                   ? accent
                                                   : isDark
                                                       ? AppColors.white
@@ -338,6 +339,85 @@ class _SidePanelState extends State<SidePanel> {
                                                       ? AppColors.white
                                                       : AppColors.black,
                                               fontSize: width * 0.009),
+                                        ),
+                                    ],
+                                  ),
+                                ),
+                                const SizedBox(
+                                  height: 20,
+                                ),
+                                GestureDetector(
+                                  onTap: () {
+                                    setState(() {
+                                      page = "uniteai";
+                                    });
+                                  },
+                                  child: Row(
+                                    mainAxisAlignment: _isHovered
+                                        ? MainAxisAlignment.start
+                                        : MainAxisAlignment.center,
+                                    children: [
+                                      Stack(
+                                        clipBehavior: Clip.none,
+                                        children: [
+                                          HugeIcon(
+                                            size: 22,
+                                            icon: HugeIcons
+                                                .strokeRoundedGoogleGemini,
+                                            color: page == "uniteai"
+                                                ? accent
+                                                : !isDark
+                                                    ? AppColors.dark
+                                                    : AppColors.grey,
+                                          ),
+                                          Positioned(
+                                            top:
+                                                -10, // Place "new" above the icon
+                                            left:
+                                                10, // Center align with the icon
+                                            child: Container(
+                                              padding:
+                                                  const EdgeInsets.symmetric(
+                                                      horizontal: 4,
+                                                      vertical: 2),
+                                              decoration: BoxDecoration(
+                                                color: accent,
+                                                borderRadius:
+                                                    BorderRadius.circular(4),
+                                              ),
+                                              child: Text(
+                                                "new",
+                                                style: GoogleFonts.epilogue(
+                                                  color: Colors.white,
+                                                  fontSize:
+                                                      8, // Small font for the badge
+                                                  fontWeight: FontWeight.w300,
+                                                ),
+                                              ),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                      if (_isHovered && _isTextVisible)
+                                        const SizedBox(
+                                          width: 10,
+                                        ),
+                                      if (_isHovered && _isTextVisible)
+                                        Stack(
+                                          clipBehavior: Clip.none,
+                                          children: [
+                                            Text(
+                                              "unite.ai",
+                                              style: GoogleFonts.epilogue(
+                                                color: page == "uniteai"
+                                                    ? accent
+                                                    : isDark
+                                                        ? AppColors.white
+                                                        : AppColors.black,
+                                                fontSize: width * 0.009,
+                                              ),
+                                            ),
+                                          ],
                                         ),
                                     ],
                                   ),
@@ -546,11 +626,15 @@ class _SidePanelState extends State<SidePanel> {
                                 userData: userData,
                                 themeData: themeData,
                               )
-                            : page == "settings"
-                                ? DesktopSettings(
-                                    userData: userData,
-                                    themeData: themeData,
-                                  )
+                            : page == "teams"
+                                    ? DesktopTeams(
+                                        userData: userData,
+                                        themeData: themeData)
+                                    : page == "settings"
+                                ?  DesktopSettings(
+                                        userData: userData,
+                                        themeData: themeData,
+                                      )
                                 : page == "calendar"
                                     ? DesktopCalendar(
                                         userData: userData,
@@ -560,7 +644,7 @@ class _SidePanelState extends State<SidePanel> {
                                         ? DesktopNotes(
                                             userData: userData,
                                             themeData: themeData)
-                                        : DesktopTeams(
+                                        : CodeUtilitiesHome(
                                             userData: userData,
                                             themeData: themeData,
                                           ),

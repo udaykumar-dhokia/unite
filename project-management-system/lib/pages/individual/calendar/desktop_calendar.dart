@@ -17,8 +17,9 @@ import 'package:unite/models/note.dart';
 import 'package:uuid/uuid.dart';
 
 class DesktopCalendar extends StatefulWidget {
-  Map<String, dynamic>? themeData;
-  Map<String, dynamic>? userData;
+  final Map<String, dynamic>? themeData;
+  final Map<String, dynamic>? userData;
+
   DesktopCalendar({super.key, required this.userData, required this.themeData});
 
   @override
@@ -28,7 +29,6 @@ class DesktopCalendar extends StatefulWidget {
 class _DesktopCalendarState extends State<DesktopCalendar>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
-  bool isLoading = false;
 
   Future<void> addNoteToFirestore(Note note) async {
     final notesCollection = FirebaseFirestore.instance
@@ -75,181 +75,133 @@ class _DesktopCalendarState extends State<DesktopCalendar>
         backgroundColor:
             widget.themeData!["mode"] ? AppColors.dark : AppColors.white,
         appBar: AppBar(
-          surfaceTintColor: AppColors.transparent,
-          toolbarHeight: 80,
-          backgroundColor:
-              widget.themeData!["mode"] ? AppColors.dark : AppColors.white,
-          title: Row(
-            crossAxisAlignment: CrossAxisAlignment.end,
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                "Calendar",
-                style: GoogleFonts.epilogue(
-                  fontSize: width * 0.02,
-                  fontWeight: FontWeight.bold,
-                  color: widget.themeData!["mode"]
-                      ? AppColors.white
-                      : AppColors.black,
-                ),
+              surfaceTintColor: AppColors.transparent,
+              toolbarHeight: 80,
+              backgroundColor:
+                  widget.themeData!["mode"] ? AppColors.dark : AppColors.white,
+              title: Row(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    "Calendar",
+                    style: GoogleFonts.epilogue(
+                      fontSize: width * 0.02,
+                      fontWeight: FontWeight.bold,
+                      color: widget.themeData!["mode"]
+                          ? AppColors.white
+                          : AppColors.black,
+                    ),
+                  ),
+                ],
               ),
-            ],
-          ),
-          bottom: TabBar(
+            ),
+        body: Padding(
+          padding: const EdgeInsets.all(15),
+          child: TabBarView(
             controller: _tabController,
-            indicatorColor: accentColor,
-            labelColor: accentColor,
-            labelStyle: GoogleFonts.epilogue(),
-            overlayColor:
-                WidgetStateProperty.all<Color>(accentColor.withOpacity(0.2)),
-            unselectedLabelColor: theme ? AppColors.white : AppColors.black,
-            tabs: const [
-              Tab(
-                text: "Month",
-              ),
-            ],
-          ),
-        ),
-        body: Container(
-          padding: const EdgeInsets.only(left: 15, right: 15),
-          width: (width * 0.94) - 30,
-          height: height,
-          child: Column(
             children: [
-              const SizedBox(height: 20),
-              Expanded(
-                child: Container(
-                  decoration:
-                      BoxDecoration(borderRadius: BorderRadius.circular(20)),
-                  child: TabBarView(
-                    controller: _tabController,
-                    children: [
-                      SfCalendar(
-                        onTap: (calendarTapDetails) {
-                          if (calendarTapDetails.targetElement ==
-                              CalendarElement.calendarCell) {
-                            final DateTime selectedDate =
-                                calendarTapDetails.date!;
+              SfCalendar(
+                view: CalendarView.month,
+                monthCellBuilder: (context, details) {
+                  return StreamBuilder<List<Note>>(
+                    stream: fetchNotesForDate(
+                        DateFormat('yyyy-MM-dd').format(details.date)),
+                    builder: (context, snapshot) {
+                      final notes = snapshot.data ?? [];
+                      bool isToday = details.date.year == DateTime.now().year &&
+                          details.date.month == DateTime.now().month &&
+                          details.date.day == DateTime.now().day;
+                      Color cellBackgroundColor = isToday
+                          ? accentColor
+                          : theme
+                              ? AppColors.dark
+                              : AppColors.white;
 
-                            // Check if the selected date is today or in the future
-                            if (selectedDate.isAtSameMomentAs(DateTime.now()) ||
-                                selectedDate.isBefore(DateTime.now().subtract(
-                                    Duration(
-                                        hours: DateTime.now().hour,
-                                        minutes: DateTime.now().minute,
-                                        seconds: DateTime.now().second)))) {
-                            } else {
-                              SideSheet.right(
-                                sheetColor: AppColors.transparent,
-                                barrierColor: theme
-                                    ? AppColors.grey.withOpacity(0.1)
-                                    : AppColors.black.withOpacity(0.3),
-                                width: width * 0.4,
-                                context: context,
-                                body: CreateNote(
-                                  userData: widget.userData,
-                                  themeData: widget.themeData,
-                                  date: selectedDate,
-                                ),
-                              );
-                            }
-                          }
-                        },
-                        monthCellBuilder:
-                            (BuildContext context, MonthCellDetails details) {
-                          return StreamBuilder<List<Note>>(
-                            stream: fetchNotesForDate(
-                                DateFormat('yyyy-MM-dd').format(details.date)),
-                            builder: (context, snapshot) {
-                              if (snapshot.connectionState ==
-                                  ConnectionState.waiting) {
-                                return Center(
-                                  child: CircularProgressIndicator(
-                                    color: accentColor,
-                                  ),
-                                );
-                              }
-
-                              final notes = snapshot.data ?? [];
-
-                              bool isToday = details.date.year ==
-                                      DateTime.now().year &&
-                                  details.date.month == DateTime.now().month &&
-                                  details.date.day == DateTime.now().day;
-                              Color cellBackgroundColor = isToday
-                                  ? accentColor
-                                  : theme
-                                      ? AppColors.dark
-                                      : AppColors.white;
-
-                              return Container(
-                                decoration: BoxDecoration(
-                                  color: cellBackgroundColor,
-                                  border: Border.all(
-                                      color: theme
-                                          ? Colors.white
-                                          : AppColors.black,
-                                      width: 0.5),
-                                ),
-                                child: Column(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    Text(
-                                      details.date.day.toString(),
-                                      style: GoogleFonts.epilogue(
-                                        color: isToday
-                                            ? AppColors.black
-                                            : theme
-                                                ? Colors.white
-                                                : AppColors.black,
-                                      ),
-                                    ),
-                                    const SizedBox(height: 10),
-                                    // Display notes if available
-                                    if (notes.isNotEmpty)
-                                      Text(
-                                        "(${notes.length.toString()})", // Show the count of notes
-                                        style: GoogleFonts.epilogue(
-                                            fontSize: 10,
-                                            color: theme
-                                                ? Colors.white
-                                                : AppColors.black),
-                                        textAlign: TextAlign.center,
-                                      ),
-                                  ],
-                                ),
-                              );
-                            },
-                          );
-                        },
-                        view: CalendarView.month,
-                        headerStyle:
-                            CalendarHeaderStyle(backgroundColor: accentColor),
-                        backgroundColor: AppColors.white,
-                        viewHeaderStyle: ViewHeaderStyle(
-                          dateTextStyle: GoogleFonts.epilogue(),
-                          dayTextStyle: GoogleFonts.epilogue(),
+                      return Container(
+                        decoration: BoxDecoration(
+                          color: cellBackgroundColor,
+                          border: Border.all(
+                              color: theme ? AppColors.white : AppColors.black,
+                              width: 0.5),
+                          borderRadius: BorderRadius.circular(8),
                         ),
-                        cellBorderColor: accentColor,
-                        selectionDecoration: BoxDecoration(
-                          color: accentColor.withOpacity(0.2),
+                        margin: const EdgeInsets.all(2),
+                        padding: const EdgeInsets.all(5),
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Text(
+                              details.date.day.toString(),
+                              style: GoogleFonts.epilogue(
+                                color: isToday
+                                    ? AppColors.black
+                                    : theme
+                                        ? Colors.white
+                                        : AppColors.black,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            if (notes.isNotEmpty) ...[
+                              const SizedBox(height: 4),
+                              Text(
+                                "${notes.length} Notes",
+                                style: GoogleFonts.epilogue(
+                                    fontSize: 10,
+                                    color:
+                                        theme ? Colors.white : AppColors.black),
+                              ),
+                            ],
+                          ],
                         ),
-                      ),
-                      // SfCalendar(
-                      //   view: CalendarView.week,
-                      //   headerStyle:
-                      //       CalendarHeaderStyle(backgroundColor: accentColor),
-                      //   backgroundColor: AppColors.white,
-                      // ),
-                      // SfCalendar(
-                      //   view: CalendarView.timelineDay,
-                      //   headerStyle:
-                      //       CalendarHeaderStyle(backgroundColor: accentColor),
-                      //   backgroundColor: AppColors.white,
-                      // ),
-                    ],
+                      );
+                    },
+                  );
+                },
+                headerStyle: CalendarHeaderStyle(
+                  backgroundColor: accentColor,
+                  textAlign: TextAlign.center,
+                  textStyle: GoogleFonts.epilogue(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      color: AppColors.white),
+                ),
+                viewHeaderStyle: ViewHeaderStyle(
+                  dateTextStyle: GoogleFonts.epilogue(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w600,
+                    color: theme ? Colors.white : AppColors.black,
+                  ),
+                  dayTextStyle: GoogleFonts.epilogue(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w600,
+                    color: theme ? Colors.white : AppColors.black,
                   ),
                 ),
+                cellBorderColor: accentColor,
+                selectionDecoration: BoxDecoration(
+                  color: accentColor.withOpacity(0.2),
+                  border: Border.all(color: accentColor, width: 1),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                onTap: (details) {
+                  if (details.targetElement == CalendarElement.calendarCell &&
+                      details.date != null) {
+                    SideSheet.right(
+                      sheetColor: AppColors.transparent,
+                      barrierColor: theme
+                          ? AppColors.grey.withOpacity(0.1)
+                          : AppColors.black.withOpacity(0.3),
+                      width: width * 0.4,
+                      context: context,
+                      body: CreateNote(
+                        userData: widget.userData,
+                        themeData: widget.themeData,
+                        date: details.date!,
+                      ),
+                    );
+                  }
+                },
               ),
             ],
           ),
@@ -358,6 +310,9 @@ class CreateNoteState extends State<CreateNote>
     TextEditingController _manager =
         TextEditingController(text: widget.userData!["name"]);
 
+    // Check if the date is in the past
+    bool isPastDate = widget.date.isBefore(DateTime.now());
+
     return Scaffold(
       backgroundColor: AppColors.transparent,
       body: Container(
@@ -425,15 +380,6 @@ class CreateNoteState extends State<CreateNote>
                 controller: _tabController,
                 children: [
                   // View Notes Tab
-                  // if (notes.length == 0)
-                  //   Center(
-                  //     child: Text(
-                  //       "Add task.",
-                  //       style: GoogleFonts.epilogue(
-                  //         color: theme ? AppColors.white : AppColors.dark,
-                  //       ),
-                  //     ),
-                  //   ),
                   StreamBuilder<QuerySnapshot>(
                     stream: FirebaseFirestore.instance
                         .collection('users')
@@ -521,7 +467,22 @@ class CreateNoteState extends State<CreateNote>
                         FloatingActionButton(
                           backgroundColor: accentColor,
                           onPressed: () async {
-                            if (_title.text.isEmpty &&
+                            if (isPastDate) {
+                              CherryToast.error(
+                                displayCloseButton: false,
+                                toastPosition: Position.top,
+                                description: Text(
+                                  textAlign: TextAlign.start,
+                                  "Cannot create tasks for past dates.",
+                                  style:
+                                      GoogleFonts.epilogue(color: Colors.black),
+                                ),
+                                animationType: AnimationType.fromTop,
+                                animationDuration:
+                                    const Duration(milliseconds: 1000),
+                                autoDismiss: true,
+                              ).show(context);
+                            } else if (_title.text.isEmpty &&
                                 _description.text.isEmpty) {
                               CherryToast.error(
                                 displayCloseButton: false,

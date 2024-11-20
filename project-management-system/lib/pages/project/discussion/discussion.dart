@@ -220,8 +220,7 @@ class _DiscussionState extends State<Discussion> {
                 .collection("projects")
                 .doc(widget.id)
                 .collection("chat")
-                .orderBy("time",
-                    descending: false) // Sort by time in ascending order
+                .orderBy("time", descending: false)
                 .snapshots(),
             builder: (context, AsyncSnapshot<QuerySnapshot> snapshot) {
               if (snapshot.connectionState == ConnectionState.waiting) {
@@ -250,6 +249,9 @@ class _DiscussionState extends State<Discussion> {
                       snapshot.data!.docs[index];
                   bool isCurrentUser = documentSnapshot['username'] ==
                       widget.userData["username"];
+
+                  bool isManager = documentSnapshot['username'] ==
+                      widget.userData["manager"];
                   var data = documentSnapshot.data() as Map<String, dynamic>;
                   bool hasImage = data.containsKey('image');
 
@@ -277,9 +279,11 @@ class _DiscussionState extends State<Discussion> {
                               style: GoogleFonts.epilogue(
                                 color: isCurrentUser
                                     ? accentColor
-                                    : theme
-                                        ? AppColors.white
-                                        : AppColors.black,
+                                    : isManager
+                                        ? accentColor
+                                        : theme
+                                            ? AppColors.white
+                                            : AppColors.black,
                                 fontWeight: FontWeight.bold,
                               ),
                             ),
@@ -305,8 +309,11 @@ class _DiscussionState extends State<Discussion> {
                                       showDialog(
                                         context: context,
                                         builder: (context) => Dialog(
+                                          backgroundColor:
+                                              AppColors.transparent,
                                           child: Container(
                                             decoration: BoxDecoration(
+                                              color: AppColors.transparent,
                                               borderRadius:
                                                   BorderRadius.circular(15),
                                               image: DecorationImage(

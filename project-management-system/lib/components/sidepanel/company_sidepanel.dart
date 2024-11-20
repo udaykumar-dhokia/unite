@@ -13,6 +13,7 @@ import 'package:unite/pages/individual/notes/desktop_notes.dart';
 import 'package:unite/pages/individual/profile/desktop_company_profile.dart';
 import 'package:unite/pages/individual/profile/desktop_profile.dart';
 import 'package:unite/pages/individual/projects/desktop_projects.dart';
+import 'package:unite/pages/individual/settings/company_settings.dart';
 import 'package:unite/pages/individual/settings/desktop_settings.dart';
 import 'package:unite/pages/individual/teams/desktop_teams.dart';
 
@@ -33,7 +34,7 @@ class _CompanySidePanelState extends State<CompanySidePanel> {
   bool _isHovered = false;
   bool _isTextVisible = false;
   Timer? _hoverTimer;
-  String page = "notes";
+  String page = "home";
 
   void getDetails() async {
     setState(() {
@@ -510,7 +511,7 @@ class _CompanySidePanelState extends State<CompanySidePanel> {
                                 themeData: themeData,
                               )
                             : page == "settings"
-                                ? DesktopSettings(
+                                ? CompanySettings(
                                     userData: userData,
                                     themeData: themeData,
                                   )
