@@ -36,8 +36,8 @@ class _ProjectSidePanelState extends State<ProjectSidePanel> {
   Map<String, dynamic> socialLinks = {};
   bool isLoading = false;
   // bool isDark = false;
-  bool _isHovered = false;
-  bool _isTextVisible = false;
+  bool _isHovered = true;
+  bool _isTextVisible = true;
   Timer? _hoverTimer;
   String page = "home";
 
@@ -184,9 +184,21 @@ class _ProjectSidePanelState extends State<ProjectSidePanel> {
                               ],
                             ),
                             Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
+                                Tooltip(
+                                  message: widget.data["name"],
+                                  child: Text(
+                                    overflow: TextOverflow.ellipsis,
+                                    widget.data["name"],
+                                    style: GoogleFonts.epilogue(
+                                        color: isDark
+                                            ? AppColors.white
+                                            : AppColors.dark,),
+                                  ),
+                                ),
                                 const SizedBox(
-                                  height: 20,
+                                  height: 35,
                                 ),
                                 GestureDetector(
                                   onTap: () {
@@ -634,21 +646,24 @@ class _ProjectSidePanelState extends State<ProjectSidePanel> {
                               )
                             : page == "calendar"
                                 ? ProjectCalendar(
-                                  id: widget.id,
+                                    id: widget.id,
                                     userData: userData,
                                     themeData: themeData,
                                   )
                                 : page == "calendar"
                                     ? ProjectCalendar(
-                                      userData: userData,
-                                      themeData: themeData,
-                                      id: widget.id,
-                                    )
-                                    : page == "uniteai"? CodeUtilitiesHome(themeData: themeData, userData: userData) : Drive(
-                                      id: widget.id,
-                                userData: userData!,
-
-                                    ),
+                                        userData: userData,
+                                        themeData: themeData,
+                                        id: widget.id,
+                                      )
+                                    : page == "uniteai"
+                                        ? CodeUtilitiesHome(
+                                            themeData: themeData,
+                                            userData: userData)
+                                        : Drive(
+                                            id: widget.id,
+                                            userData: userData!,
+                                          ),
                   ),
                 ],
               ),

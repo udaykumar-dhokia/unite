@@ -182,6 +182,7 @@ class _CodeUtilitiesHomeState extends State<CodeUtilitiesHome> {
               cursorColor: accentColor,
               controller: _controller,
               maxLines: 5,
+              style: GoogleFonts.epilogue(color:  theme ? AppColors.white : AppColors.dark),
               decoration: InputDecoration(
                   labelText: 'Enter Code or Question',
                   labelStyle: GoogleFonts.epilogue(
@@ -223,7 +224,7 @@ class _CodeUtilitiesHomeState extends State<CodeUtilitiesHome> {
               ),
             ),
             const SizedBox(height: 16),
-            // Show loading indicator while waiting for the response
+            // Show loading indicator while waiting for the response`
             if (_isLoading)
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -282,11 +283,11 @@ class _CodeUtilitiesHomeState extends State<CodeUtilitiesHome> {
                   padding: const EdgeInsets.all(12.0),
                   width: width,
                   decoration: BoxDecoration(
-                    color: AppColors.transparent,
+                    color: AppColors.white,
                     borderRadius: BorderRadius.circular(8.0),
                     border: Border.all(color: Colors.grey.shade400),
                   ),
-                  child: Markdown(data: _result, selectable: true,)
+                  child: Markdown(data: _result, selectable: true, )
                 ),
               ),
           ],

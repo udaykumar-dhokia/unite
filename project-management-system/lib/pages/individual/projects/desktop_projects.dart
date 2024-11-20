@@ -6,6 +6,7 @@ import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:side_sheet/side_sheet.dart';
 import 'package:unite/components/createproject/createproject.dart';
+import 'package:unite/components/sidepanel/company_project_sidepanel.dart';
 import 'package:unite/components/sidepanel/project_sidepanel.dart';
 import 'package:unite/constants/color/color.dart';
 import 'package:unite/constants/theme/themehandler.dart';
@@ -488,10 +489,13 @@ class _DesktopProjectsState extends State<DesktopProjects> {
                                     Navigator.push(
                                       context,
                                       MaterialPageRoute(
-                                        builder: (context) => ProjectSidePanel(
-                                          data: data,
-                                          id: documentId,
-                                        ),
+                                        builder: (context) => !isNameTaken
+                                            ? CompanyProjectSidePanel(
+                                                data: data, id: documentId)
+                                            : ProjectSidePanel(
+                                                data: data,
+                                                id: documentId,
+                                              ),
                                       ),
                                     );
                                   },

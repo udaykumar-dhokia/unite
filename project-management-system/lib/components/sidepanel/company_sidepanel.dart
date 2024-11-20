@@ -31,8 +31,8 @@ class _CompanySidePanelState extends State<CompanySidePanel> {
   Map<String, dynamic> socialLinks = {};
   bool isLoading = false;
   // bool isDark = false;
-  bool _isHovered = false;
-  bool _isTextVisible = false;
+  bool _isHovered = true;
+  bool _isTextVisible = true;
   Timer? _hoverTimer;
   String page = "home";
 
@@ -51,15 +51,6 @@ class _CompanySidePanelState extends State<CompanySidePanel> {
       });
     }
 
-    final social = await FirebaseFirestore.instance
-        .collection("users")
-        .doc(userData!["username"])
-        .collection("Social")
-        .doc("links")
-        .get();
-    setState(() {
-      socialLinks = social.data() ?? {};
-    });
 
     final theme = await FirebaseFirestore.instance
         .collection("company")

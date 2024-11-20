@@ -15,15 +15,21 @@ import 'package:unite/pages/individual/projects/desktop_projects.dart';
 import 'package:unite/pages/individual/settings/desktop_settings.dart';
 import 'package:unite/pages/individual/teams/desktop_teams.dart';
 import 'package:unite/pages/individual/uniteai/uniteai.dart';
+import 'package:unite/pages/project/calendar/project_calendar.dart';
+import 'package:unite/pages/project/dashboard/dashboard.dart';
+import 'package:unite/pages/project/discussion/discussion.dart';
+import 'package:unite/pages/project/drive/drive.dart';
 
-class SidePanel extends StatefulWidget {
-  const SidePanel({super.key});
+class CompanyProjectSidePanel extends StatefulWidget {
+  final Map<String, dynamic> data;
+  final String id;
+  const CompanyProjectSidePanel({super.key, required this.data, required this.id});
 
   @override
-  State<SidePanel> createState() => _SidePanelState();
+  State<CompanyProjectSidePanel> createState() => _CompanyProjectSidePanelState();
 }
 
-class _SidePanelState extends State<SidePanel> {
+class _CompanyProjectSidePanelState extends State<CompanyProjectSidePanel> {
   User? user = FirebaseAuth.instance.currentUser;
   Map<String, dynamic>? userData;
   Map<String, dynamic>? themeData;
@@ -40,33 +46,22 @@ class _SidePanelState extends State<SidePanel> {
       isLoading = true;
     });
     final data = await FirebaseFirestore.instance
-        .collection("users")
-        .where("email", isEqualTo: user!.email)
+        .collection("company")
+        .doc(user!.email)
         .get();
 
-    for (var docs in data.docs) {
       setState(() {
-        userData = docs.data();
+        userData = data.data();
       });
-    }
-
-    final social = await FirebaseFirestore.instance
-        .collection("users")
-        .doc(userData!["username"])
-        .collection("Social")
-        .doc("links")
-        .get();
-    setState(() {
-      socialLinks = social.data() ?? {};
-    });
 
     final theme = await FirebaseFirestore.instance
-        .collection("users")
-        .doc(userData!["username"])
+        .collection("company")
+        .doc(user!.email)
         .collection("Theme")
         .doc("settings")
         .get();
 
+    print(theme.data());
     setState(() {
       themeData = theme.data();
       // isDark = themeData!["mode"];
@@ -140,7 +135,7 @@ class _SidePanelState extends State<SidePanel> {
                             : null,
                       ),
                       child: Padding(
-                        padding: const EdgeInsets.only(top: 8, bottom: 8),
+                        padding: const EdgeInsets.only(bottom: 8),
                         child: Column(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
@@ -149,38 +144,47 @@ class _SidePanelState extends State<SidePanel> {
                                 const SizedBox(
                                   height: 10,
                                 ),
-                                Row(
-                                  mainAxisAlignment: _isHovered
-                                      ? MainAxisAlignment.start
-                                      : MainAxisAlignment.center,
-                                  crossAxisAlignment: CrossAxisAlignment.center,
-                                  children: [
-                                    const CircleAvatar(
-                                      radius: 18,
-                                      backgroundImage:
-                                          AssetImage("lib/assets/logo.jpg"),
-                                    ),
-                                    if (_isHovered && _isTextVisible)
-                                      const SizedBox(
-                                        width: 10,
+                                InkWell(
+                                  onTap: () {
+                                    Navigator.pop(context);
+                                  },
+                                  child: Row(
+                                    mainAxisAlignment: _isHovered
+                                        ? MainAxisAlignment.start
+                                        : MainAxisAlignment.center,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.center,
+                                    children: [
+                                      HugeIcon(
+                                        size: 22,
+                                        icon:
+                                            HugeIcons.strokeRoundedArrowLeft01,
+                                        color: !isDark
+                                            ? AppColors.dark
+                                            : AppColors.grey,
                                       ),
-                                    if (_isHovered && _isTextVisible)
-                                      Text(
-                                        "Unite.",
-                                        style: GoogleFonts.epilogue(
-                                            color: isDark
-                                                ? AppColors.white
-                                                : AppColors.black,
-                                            fontSize: width * 0.01),
-                                      ),
-                                  ],
+                                      if (_isHovered && _isTextVisible)
+                                        const SizedBox(
+                                          width: 10,
+                                        ),
+                                      if (_isHovered && _isTextVisible)
+                                        Text(
+                                          "Back",
+                                          style: GoogleFonts.epilogue(
+                                              color: isDark
+                                                  ? AppColors.white
+                                                  : AppColors.black,
+                                              fontSize: width * 0.01),
+                                        ),
+                                    ],
+                                  ),
                                 ),
                               ],
                             ),
                             Column(
                               children: [
                                 const SizedBox(
-                                  height: 30,
+                                  height: 20,
                                 ),
                                 GestureDetector(
                                   onTap: () {
@@ -195,7 +199,8 @@ class _SidePanelState extends State<SidePanel> {
                                     children: [
                                       HugeIcon(
                                         size: 22,
-                                        icon: HugeIcons.strokeRoundedChartRose,
+                                        icon: HugeIcons
+                                            .strokeRoundedDashboardSquare03,
                                         color: page == "home"
                                             ? accent
                                             : !isDark
@@ -208,7 +213,7 @@ class _SidePanelState extends State<SidePanel> {
                                         ),
                                       if (_isHovered && _isTextVisible)
                                         Text(
-                                          "Projects",
+                                          "Dashboard",
                                           style: GoogleFonts.epilogue(
                                               color: page == "home"
                                                   ? accent
@@ -226,7 +231,7 @@ class _SidePanelState extends State<SidePanel> {
                                 GestureDetector(
                                   onTap: () {
                                     setState(() {
-                                      page = "teams";
+                                      page = "chat";
                                     });
                                   },
                                   child: Row(
@@ -236,8 +241,8 @@ class _SidePanelState extends State<SidePanel> {
                                     children: [
                                       HugeIcon(
                                         size: 22,
-                                        icon: HugeIcons.strokeRoundedUserGroup,
-                                        color: page == "teams"
+                                        icon: HugeIcons.strokeRoundedChatting01,
+                                        color: page == "chat"
                                             ? accent
                                             : !isDark
                                                 ? AppColors.dark
@@ -249,9 +254,50 @@ class _SidePanelState extends State<SidePanel> {
                                         ),
                                       if (_isHovered && _isTextVisible)
                                         Text(
-                                          "Teams",
+                                          "Discussion",
                                           style: GoogleFonts.epilogue(
-                                              color: page == "teams"
+                                              color: page == "chat"
+                                                  ? accent
+                                                  : isDark
+                                                      ? AppColors.white
+                                                      : AppColors.black,
+                                              fontSize: width * 0.009),
+                                        ),
+                                    ],
+                                  ),
+                                ),
+                                const SizedBox(
+                                  height: 20,
+                                ),
+                                GestureDetector(
+                                  onTap: () {
+                                    setState(() {
+                                      page = "drive";
+                                    });
+                                  },
+                                  child: Row(
+                                    mainAxisAlignment: _isHovered
+                                        ? MainAxisAlignment.start
+                                        : MainAxisAlignment.center,
+                                    children: [
+                                      HugeIcon(
+                                        size: 22,
+                                        icon: HugeIcons.strokeRoundedFolder01,
+                                        color: page == "drive"
+                                            ? accent
+                                            : !isDark
+                                                ? AppColors.dark
+                                                : AppColors.grey,
+                                      ),
+                                      if (_isHovered && _isTextVisible)
+                                        const SizedBox(
+                                          width: 10,
+                                        ),
+                                      if (_isHovered && _isTextVisible)
+                                        Text(
+                                          "Drive",
+                                          style: GoogleFonts.epilogue(
+                                              color: page == "drive"
                                                   ? accent
                                                   : isDark
                                                       ? AppColors.white
@@ -277,7 +323,7 @@ class _SidePanelState extends State<SidePanel> {
                                     children: [
                                       HugeIcon(
                                         size: 22,
-                                        icon: HugeIcons.strokeRoundedCalendar03,
+                                        icon: HugeIcons.strokeRoundedCalendar02,
                                         color: page == "calendar"
                                             ? accent
                                             : !isDark
@@ -293,47 +339,6 @@ class _SidePanelState extends State<SidePanel> {
                                           "Calendar",
                                           style: GoogleFonts.epilogue(
                                               color: page == "calendar"
-                                                  ? accent
-                                                  : isDark
-                                                      ? AppColors.white
-                                                      : AppColors.black,
-                                              fontSize: width * 0.009),
-                                        ),
-                                    ],
-                                  ),
-                                ),
-                                const SizedBox(
-                                  height: 20,
-                                ),
-                                GestureDetector(
-                                  onTap: () {
-                                    setState(() {
-                                      page = "notes";
-                                    });
-                                  },
-                                  child: Row(
-                                    mainAxisAlignment: _isHovered
-                                        ? MainAxisAlignment.start
-                                        : MainAxisAlignment.center,
-                                    children: [
-                                      HugeIcon(
-                                        size: 22,
-                                        icon: HugeIcons.strokeRoundedNote,
-                                        color: page == "notes"
-                                            ? accent
-                                            : !isDark
-                                                ? AppColors.dark
-                                                : AppColors.grey,
-                                      ),
-                                      if (_isHovered && _isTextVisible)
-                                        const SizedBox(
-                                          width: 10,
-                                        ),
-                                      if (_isHovered && _isTextVisible)
-                                        Text(
-                                          "Notes",
-                                          style: GoogleFonts.epilogue(
-                                              color: page == "notes"
                                                   ? accent
                                                   : isDark
                                                       ? AppColors.white
@@ -513,96 +518,96 @@ class _SidePanelState extends State<SidePanel> {
                                     ],
                                   ),
                                 ),
-                                const SizedBox(
-                                  height: 20,
-                                ),
-                                GestureDetector(
-                                  onTap: () {
-                                    setState(() {
-                                      page = "settings";
-                                    });
-                                  },
-                                  child: Row(
-                                    mainAxisAlignment: _isHovered
-                                        ? MainAxisAlignment.start
-                                        : MainAxisAlignment.center,
-                                    children: [
-                                      HugeIcon(
-                                        size: 22,
-                                        icon: HugeIcons.strokeRoundedSettings05,
-                                        color: page == "settings"
-                                            ? accent
-                                            : !isDark
-                                                ? AppColors.dark
-                                                : AppColors.grey,
-                                      ),
-                                      if (_isHovered && _isTextVisible)
-                                        const SizedBox(
-                                          width: 10,
-                                        ),
-                                      if (_isHovered && _isTextVisible)
-                                        Text(
-                                          "Settings",
-                                          style: GoogleFonts.epilogue(
-                                              color: page == "settings"
-                                                  ? accent
-                                                  : isDark
-                                                      ? AppColors.white
-                                                      : AppColors.black,
-                                              fontSize: width * 0.009),
-                                        ),
-                                    ],
-                                  ),
-                                ),
-                                const SizedBox(
-                                  height: 20,
-                                ),
-                                GestureDetector(
-                                  onTap: () {
-                                    setState(() {
-                                      page = "profile";
-                                    });
-                                  },
-                                  child: Row(
-                                    mainAxisAlignment: _isHovered
-                                        ? MainAxisAlignment.start
-                                        : MainAxisAlignment.center,
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.center,
-                                    children: [
-                                      CircleAvatar(
-                                        backgroundImage:
-                                            userData!["profileImage"] == null
-                                                ? const AssetImage(
-                                                    "lib/assets/user.jpg")
-                                                : NetworkImage(
-                                                    userData!["profileImage"]),
-                                        radius: 15,
-                                      ),
-                                      if (_isHovered && _isTextVisible)
-                                        const SizedBox(
-                                          width: 10,
-                                        ),
-                                      if (_isHovered && _isTextVisible)
-                                        Expanded(
-                                          child: Column(
-                                            crossAxisAlignment:
-                                                CrossAxisAlignment.start,
-                                            children: [
-                                              Text(
-                                                userData!["name"],
-                                                style: GoogleFonts.epilogue(
-                                                    color: isDark
-                                                        ? AppColors.white
-                                                        : AppColors.black,
-                                                    fontSize: width * 0.009),
-                                              ),
-                                            ],
-                                          ),
-                                        ),
-                                    ],
-                                  ),
-                                ),
+                                // const SizedBox(
+                                //   height: 20,
+                                // ),
+                                // GestureDetector(
+                                //   onTap: () {
+                                //     setState(() {
+                                //       page = "settings";
+                                //     });
+                                //   },
+                                //   child: Row(
+                                //     mainAxisAlignment: _isHovered
+                                //         ? MainAxisAlignment.start
+                                //         : MainAxisAlignment.center,
+                                //     children: [
+                                //       HugeIcon(
+                                //         size: 22,
+                                //         icon: HugeIcons.strokeRoundedSettings05,
+                                //         color: page == "settings"
+                                //             ? accent
+                                //             : !isDark
+                                //                 ? AppColors.dark
+                                //                 : AppColors.grey,
+                                //       ),
+                                //       if (_isHovered && _isTextVisible)
+                                //         const SizedBox(
+                                //           width: 10,
+                                //         ),
+                                //       if (_isHovered && _isTextVisible)
+                                //         Text(
+                                //           "Settings",
+                                //           style: GoogleFonts.epilogue(
+                                //               color: page == "settings"
+                                //                   ? accent
+                                //                   : isDark
+                                //                       ? AppColors.white
+                                //                       : AppColors.black,
+                                //               fontSize: width * 0.009),
+                                //         ),
+                                //     ],
+                                //   ),
+                                // ),
+                                // const SizedBox(
+                                //   height: 20,
+                                // ),
+                                // GestureDetector(
+                                //   onTap: () {
+                                //     setState(() {
+                                //       page = "profile";
+                                //     });
+                                //   },
+                                //   child: Row(
+                                //     mainAxisAlignment: _isHovered
+                                //         ? MainAxisAlignment.start
+                                //         : MainAxisAlignment.center,
+                                //     crossAxisAlignment:
+                                //         CrossAxisAlignment.center,
+                                //     children: [
+                                //       CircleAvatar(
+                                //         backgroundImage:
+                                //             userData!["profileImage"] == null
+                                //                 ? const AssetImage(
+                                //                     "lib/assets/user.jpg")
+                                //                 : NetworkImage(
+                                //                     userData!["profileImage"]),
+                                //         radius: 15,
+                                //       ),
+                                //       if (_isHovered && _isTextVisible)
+                                //         const SizedBox(
+                                //           width: 10,
+                                //         ),
+                                //       if (_isHovered && _isTextVisible)
+                                //         Expanded(
+                                //           child: Column(
+                                //             crossAxisAlignment:
+                                //                 CrossAxisAlignment.start,
+                                //             children: [
+                                //               Text(
+                                //                 userData!["name"],
+                                //                 style: GoogleFonts.epilogue(
+                                //                     color: isDark
+                                //                         ? AppColors.white
+                                //                         : AppColors.black,
+                                //                     fontSize: width * 0.009),
+                                //               ),
+                                //             ],
+                                //           ),
+                                //         ),
+                                //     ],
+                                //   ),
+                                // ),
                               ],
                             ),
                           ],
@@ -616,38 +621,32 @@ class _SidePanelState extends State<SidePanel> {
                     width:
                         !_isHovered ? (width * 0.94) - 20 : (width * 0.9) - 20,
                     child: page == "home"
-                        ? DesktopProjects(
+                        ? Dashboard(
+                            id: widget.id,
                             userData: userData,
-                            themeData: themeData,
                           )
-                        : page == "profile"
-                            ? DesktopProfile(
-                                socialLinks: socialLinks,
-                                userData: userData,
-                                themeData: themeData,
+                        : page == "chat"
+                            ? Discussion(
+                                id: widget.id,
+                                userData: userData!,
                               )
-                            : page == "teams"
-                                    ? DesktopTeams(
-                                        userData: userData,
-                                        themeData: themeData)
-                                    : page == "settings"
-                                ?  DesktopSettings(
-                                        userData: userData,
-                                        themeData: themeData,
-                                      )
+                            : page == "calendar"
+                                ? ProjectCalendar(
+                                  id: widget.id,
+                                    userData: userData,
+                                    themeData: themeData,
+                                  )
                                 : page == "calendar"
-                                    ? DesktopCalendar(
-                                        userData: userData,
-                                        themeData: themeData,
-                                      )
-                                    : page == "notes"
-                                        ? DesktopNotes(
-                                            userData: userData,
-                                            themeData: themeData)
-                                        : CodeUtilitiesHome(
-                                            userData: userData,
-                                            themeData: themeData,
-                                          ),
+                                    ? ProjectCalendar(
+                                      userData: userData,
+                                      themeData: themeData,
+                                      id: widget.id,
+                                    )
+                                    : page == "uniteai"? CodeUtilitiesHome(themeData: themeData, userData: userData) : Drive(
+                                      id: widget.id,
+                                userData: userData!,
+
+                                    ),
                   ),
                 ],
               ),
