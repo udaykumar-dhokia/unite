@@ -17,7 +17,6 @@ The Project Management System is a robust and comprehensive solution crafted to 
 ### 2. Team Collaboration
 - **Real-Time Communication**: Team members can comment on tasks, share files, and discuss issues in real-time to avoid miscommunication.
 - **File Sharing**: Easily upload and share important documents or media files directly within the app.
-- **Tagging and Mentions**: Mention teammates to get specific feedback or keep everyone informed.
 
 ### 3. Project Tracking
 - **Visual Progress Representation**: Track the status of projects with progress bars, Gantt charts, or Kanban boards.
@@ -25,7 +24,6 @@ The Project Management System is a robust and comprehensive solution crafted to 
 - **Milestones and Goals**: Set project milestones and goals, and track achievements as the project progresses.
 
 ### 4. User Management
-- **Role-Based Permissions**: Assign roles (e.g., Admin, Manager, Contributor) with specific permissions to ensure data security and controlled access.
 - **Add or Remove Users**: Easily manage team members by adding or removing users as projects evolve.
 - **Customized Access Control**: Define which users have access to specific tasks or projects, ensuring sensitive information remains protected.
 
