@@ -234,7 +234,7 @@ class _CodeUtilitiesHomeState extends State<CodeUtilitiesHome> {
                     duration:
                         const Duration(seconds: 1), // Smooth transition over 1 second
                     curve: Curves.easeInOut, // Smooth transition curve
-                    height: 25,
+                    height: 20,
                     width: width,
                     decoration: BoxDecoration(
                       color: AppColors.grey.withOpacity(opacity1),
@@ -245,7 +245,7 @@ class _CodeUtilitiesHomeState extends State<CodeUtilitiesHome> {
                   AnimatedContainer(
                     duration: const Duration(seconds: 1),
                     curve: Curves.easeInOut,
-                    height: 25,
+                    height: 20,
                     width: width * 0.75,
                     decoration: BoxDecoration(
                       color: AppColors.grey.withOpacity(opacity2),
@@ -256,7 +256,7 @@ class _CodeUtilitiesHomeState extends State<CodeUtilitiesHome> {
                   AnimatedContainer(
                     duration: const Duration(seconds: 1),
                     curve: Curves.easeInOut,
-                    height: 25,
+                    height: 20,
                     width: width * 0.50,
                     decoration: BoxDecoration(
                       color: AppColors.grey.withOpacity(opacity3),
@@ -267,7 +267,7 @@ class _CodeUtilitiesHomeState extends State<CodeUtilitiesHome> {
                   AnimatedContainer(
                     duration: const Duration(seconds: 1),
                     curve: Curves.easeInOut,
-                    height: 25,
+                    height: 20,
                     width: width * 0.70,
                     decoration: BoxDecoration(
                       color: AppColors.grey.withOpacity(opacity3),

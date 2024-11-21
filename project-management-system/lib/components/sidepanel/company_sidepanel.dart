@@ -8,6 +8,7 @@ import 'package:hugeicons/hugeicons.dart';
 import 'package:provider/provider.dart';
 import 'package:unite/constants/color/color.dart';
 import 'package:unite/constants/theme/themehandler.dart';
+import 'package:unite/pages/individual/calendar/company_calendar.dart';
 import 'package:unite/pages/individual/calendar/desktop_calendar.dart';
 import 'package:unite/pages/individual/notes/desktop_notes.dart';
 import 'package:unite/pages/individual/profile/desktop_company_profile.dart';
@@ -16,6 +17,7 @@ import 'package:unite/pages/individual/projects/desktop_projects.dart';
 import 'package:unite/pages/individual/settings/company_settings.dart';
 import 'package:unite/pages/individual/settings/desktop_settings.dart';
 import 'package:unite/pages/individual/teams/desktop_teams.dart';
+import 'package:unite/pages/individual/uniteai/uniteai.dart';
 
 class CompanySidePanel extends StatefulWidget {
   const CompanySidePanel({super.key});
@@ -50,7 +52,6 @@ class _CompanySidePanelState extends State<CompanySidePanel> {
         userData = docs.data();
       });
     }
-
 
     final theme = await FirebaseFirestore.instance
         .collection("company")
@@ -212,47 +213,7 @@ class _CompanySidePanelState extends State<CompanySidePanel> {
                                     ],
                                   ),
                                 ),
-                                const SizedBox(
-                                  height: 20,
-                                ),
-                                GestureDetector(
-                                  onTap: () {
-                                    setState(() {
-                                      page = "team";
-                                    });
-                                  },
-                                  child: Row(
-                                    mainAxisAlignment: _isHovered
-                                        ? MainAxisAlignment.start
-                                        : MainAxisAlignment.center,
-                                    children: [
-                                      HugeIcon(
-                                        size: 22,
-                                        icon: HugeIcons.strokeRoundedUserGroup,
-                                        color: page == "team"
-                                            ? accent
-                                            : !isDark
-                                                ? AppColors.dark
-                                                : AppColors.grey,
-                                      ),
-                                      if (_isHovered && _isTextVisible)
-                                        const SizedBox(
-                                          width: 10,
-                                        ),
-                                      if (_isHovered && _isTextVisible)
-                                        Text(
-                                          "Teams",
-                                          style: GoogleFonts.epilogue(
-                                              color: page == "team"
-                                                  ? accent
-                                                  : isDark
-                                                      ? AppColors.white
-                                                      : AppColors.black,
-                                              fontSize: width * 0.009),
-                                        ),
-                                    ],
-                                  ),
-                                ),
+                                
                                 const SizedBox(
                                   height: 20,
                                 ),
@@ -294,8 +255,84 @@ class _CompanySidePanelState extends State<CompanySidePanel> {
                                     ],
                                   ),
                                 ),
-                                const SizedBox(
+                                 const SizedBox(
                                   height: 20,
+                                ),
+                                GestureDetector(
+                                  onTap: () {
+                                    setState(() {
+                                      page = "uniteai";
+                                    });
+                                  },
+                                  child: Row(
+                                    mainAxisAlignment: _isHovered
+                                        ? MainAxisAlignment.start
+                                        : MainAxisAlignment.center,
+                                    children: [
+                                      Stack(
+                                        clipBehavior: Clip.none,
+                                        children: [
+                                          HugeIcon(
+                                            size: 22,
+                                            icon: HugeIcons
+                                                .strokeRoundedGoogleGemini,
+                                            color: page == "uniteai"
+                                                ? accent
+                                                : !isDark
+                                                    ? AppColors.dark
+                                                    : AppColors.grey,
+                                          ),
+                                          Positioned(
+                                            top:
+                                                -10, // Place "new" above the icon
+                                            left:
+                                                10, // Center align with the icon
+                                            child: Container(
+                                              padding:
+                                                  const EdgeInsets.symmetric(
+                                                      horizontal: 4,
+                                                      vertical: 2),
+                                              decoration: BoxDecoration(
+                                                color: accent,
+                                                borderRadius:
+                                                    BorderRadius.circular(4),
+                                              ),
+                                              child: Text(
+                                                "new",
+                                                style: GoogleFonts.epilogue(
+                                                  color: Colors.white,
+                                                  fontSize:
+                                                      8, // Small font for the badge
+                                                  fontWeight: FontWeight.w300,
+                                                ),
+                                              ),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                      if (_isHovered && _isTextVisible)
+                                        const SizedBox(
+                                          width: 10,
+                                        ),
+                                      if (_isHovered && _isTextVisible)
+                                        Stack(
+                                          clipBehavior: Clip.none,
+                                          children: [
+                                            Text(
+                                              "unite.ai",
+                                              style: GoogleFonts.epilogue(
+                                                color: page == "uniteai"
+                                                    ? accent
+                                                    : isDark
+                                                        ? AppColors.white
+                                                        : AppColors.black,
+                                                fontSize: width * 0.009,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                    ],
+                                  ),
                                 ),
                               ],
                             ),
@@ -501,15 +538,18 @@ class _CompanySidePanelState extends State<CompanySidePanel> {
                                 userData: userData,
                                 themeData: themeData,
                               )
-                            : page == "settings"
-                                ? CompanySettings(
-                                    userData: userData,
-                                    themeData: themeData,
-                                  )
-                                : DesktopTeams(
-                                    userData: userData,
-                                    themeData: themeData,
-                                  ),
+                            : page == "calendar"
+                                ? CompanyCalendar(
+                                    userData: userData, themeData: themeData)
+                                : page == "uniteai"? CodeUtilitiesHome(themeData: themeData, userData: userData) : page == "settings"
+                                    ? CompanySettings(
+                                        userData: userData,
+                                        themeData: themeData,
+                                      )
+                                    : DesktopTeams(
+                                        userData: userData,
+                                        themeData: themeData,
+                                      ),
                   ),
                 ],
               ),

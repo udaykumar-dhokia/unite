@@ -38,7 +38,6 @@ class _DesktopProfileState extends State<DesktopProfile> {
     for (var i in widget.userData!["interests"]) {
       tags.add(i);
     }
-    FirebaseAuth.instance.signOut();
   }
 
   @override

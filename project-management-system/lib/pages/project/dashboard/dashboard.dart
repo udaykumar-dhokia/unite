@@ -1,16 +1,20 @@
+import 'dart:io';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:dashed_circular_progress_bar/dashed_circular_progress_bar.dart';
+import 'package:dio/dio.dart';
+import 'package:file_picker/file_picker.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:hugeicons/hugeicons.dart';
 import 'package:intl/intl.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:provider/provider.dart';
-import 'package:side_sheet/side_sheet.dart';
-import 'package:unite/components/createproject/createproject.dart';
 import 'package:unite/components/infocards/info_card.dart';
 import 'package:unite/constants/color/color.dart';
 import 'package:unite/constants/theme/themehandler.dart';
 import 'package:unite/models/card.dart';
+import 'package:path/path.dart' as path;
 
 class Dashboard extends StatefulWidget {
   final String id;
@@ -29,6 +33,92 @@ class _DashboardState extends State<Dashboard> {
   Map<String, dynamic> projectData = {};
   bool isLoading = false;
   List<Widget> memberPhotos = [];
+  File? _file;
+  bool _isUploading = false;
+
+  Future<void> _FileImage() async {
+    FilePickerResult? result = await FilePicker.platform.pickFiles();
+
+    if (result != null) {
+      print(result);
+
+      // Set the selected file to state
+      setState(() {
+        _file = File(result.files.single.path!);
+      });
+
+      // Start the upload process
+      await _uploadFile();
+    } else {
+      // Handle case where no file was selected
+      print("No file selected");
+    }
+  }
+
+  // Function to select and upload a file
+
+  Future<void> _uploadFile() async {
+    if (_file == null) return;
+
+    try {
+      setState(() {
+        _isUploading = true;
+      });
+
+      // Extract only the file name
+      final fileName = path.basename(_file!.path);
+      final storageRef = FirebaseStorage.instance
+          .ref()
+          .child('documents/${widget.id}/$fileName');
+
+      // Upload the file
+      final uploadTask = await storageRef.putFile(_file!);
+
+      // Get the download URL
+      final downloadUrl = await uploadTask.ref.getDownloadURL();
+
+      // Save metadata to Firestore
+      await FirebaseFirestore.instance
+          .collection('projects')
+          .doc(widget.id)
+          .collection("document")
+          .add({
+        'name': fileName,
+        'url': downloadUrl,
+        'uploadedAt': DateTime.now(),
+      });
+
+      // Notify user of success
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('File uploaded successfully!')),
+      );
+    } catch (e) {
+      // Handle errors
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Failed to upload file: $e')),
+      );
+    } finally {
+      setState(() {
+        _isUploading = false;
+        _file = null;
+      });
+    }
+  }
+
+  // Function to fetch files from Firestore
+  Stream<List<Map<String, dynamic>>> _fetchFiles() {
+    return FirebaseFirestore.instance
+        .collection('projects')
+        .doc(widget.id)
+        .collection("document")
+        .snapshots()
+        .map(
+          (snapshot) => snapshot.docs
+              .map((doc) =>
+                  {'id': doc.id, ...doc.data() as Map<String, dynamic>})
+              .toList(),
+        );
+  }
 
   Future<void> getData() async {
     setState(() {
@@ -120,6 +210,61 @@ class _DashboardState extends State<Dashboard> {
     }
   }
 
+  Future<void> _checkUsernameAndAddMember(String username) async {
+  // Check if the username exists
+  final querySnapshot = await FirebaseFirestore.instance
+      .collection('users')
+      .where('username', isEqualTo: username)
+      .get();
+
+  if (querySnapshot.docs.isEmpty) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('User does not exist')),
+    );
+    return;
+  }
+
+  // Fetch the current members from the project
+  final projectDoc = FirebaseFirestore.instance
+      .collection('projects')
+      .doc(widget.id); // Use the project ID
+  final projectSnapshot = await projectDoc.get();
+
+  if (!projectSnapshot.exists) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Project not found')),
+    );
+    return;
+  }
+
+  List<dynamic> currentMembers = projectSnapshot.data()?['members'] ?? [];
+
+  // Check if the user is already a member
+  if (currentMembers.contains(username)) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('User is already a member')),
+    );
+    return;
+  }
+
+  // Add the user to the members list
+  currentMembers.add(username);
+  await projectDoc.update({'members': currentMembers});
+
+  setState(() {
+    memberPhotos.add(
+      CircleAvatar(
+        child: Text(username[0].toUpperCase()),
+      ),
+    );
+  });
+
+  ScaffoldMessenger.of(context).showSnackBar(
+    const SnackBar(content: Text('Member added successfully')),
+  );
+}
+
+
   void _showMilestoneDialog(BuildContext context) {
     final TextEditingController milestoneController = TextEditingController();
     DateTime? selectedDate;
@@ -174,7 +319,7 @@ class _DashboardState extends State<Dashboard> {
                           padding: const EdgeInsets.symmetric(vertical: 16),
                           decoration: BoxDecoration(
                             border: Border.all(color: Colors.grey),
-                            borderRadius: BorderRadius.circular(1),
+                            borderRadius: BorderRadius.circular(4),
                           ),
                           child: Center(
                             child: Text(
@@ -223,6 +368,71 @@ class _DashboardState extends State<Dashboard> {
                           );
                         }
                       },
+                      child: const Text("Add"),
+                    ),
+                  ],
+                );
+              },
+            );
+          },
+        );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("Project not found")),
+        );
+      }
+    }).catchError((error) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Error fetching project data: $error")),
+      );
+    });
+  }
+
+  
+
+
+  void _showMemeberDialog(BuildContext context) {
+    final TextEditingController _member = TextEditingController();
+
+    FirebaseFirestore.instance
+        .collection('projects')
+        .doc(widget.id)
+        .get()
+        .then((projectDoc) {
+      if (projectDoc.exists) {
+
+        showDialog(
+          context: context,
+          builder: (BuildContext context) {
+            return StatefulBuilder(
+              builder: (context, setState) {
+                return AlertDialog(
+                  title: const Text("Add Member"),
+                  content: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      TextField(
+                        controller: _member,
+                        decoration: const InputDecoration(
+                          labelText: "Member username",
+                          border: OutlineInputBorder(),
+                        ),
+                      ),
+
+                    ],
+                  ),
+                  actions: [
+                    TextButton(
+                      onPressed: () {
+                        Navigator.pop(context);
+                      },
+                      child: const Text("Cancel"),
+                    ),
+                    ElevatedButton(
+                      onPressed: () {
+                        if (_member.text.isNotEmpty) {
+                          _checkUsernameAndAddMember(_member.text);
+                        }},
                       child: const Text("Add"),
                     ),
                   ],
@@ -319,86 +529,107 @@ class _DashboardState extends State<Dashboard> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                   Row(
-  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-  children: [
-    Expanded(
-      child: FileInfoCardGridView(
-        color: accentColor,
-        projectId: widget.id,
-        childAspectRatio: _size.width < 1400 ? 1.1 : 1.4,
-      ),
-    ),
-    const SizedBox(width: 15),
-    Expanded(
-      child: Card(
-        elevation: 3,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(15),
-        ),
-        color: theme
-            ? AppColors.dark.withOpacity(0.9)
-            : AppColors.white,
-        child: Padding(
-          padding: const EdgeInsets.all(15),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                "Members",
-                style: GoogleFonts.epilogue(
-                  fontSize: width * 0.018,
-                  fontWeight: FontWeight.w500,
-                  color: theme ? AppColors.white : AppColors.black,
-                ),
-              ),
-              const SizedBox(height: 15),
-              // Display members in a horizontal list
-              memberPhotos.isEmpty
-                  ? const Center(
-                      child: CircularProgressIndicator(),
-                    )
-                  : Container(
-                      height: 100, // Adjust based on your design needs
-                      child: ListView.builder(
-                        scrollDirection: Axis.horizontal,
-                        itemCount: memberPhotos.length,
-                        itemBuilder: (context, index) {
-                          return Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 5),
-                            child: Column(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                memberPhotos[index],
-                                const SizedBox(height: 5),
-                                // Text(
-                                //   memberNames[index], // Assuming you save the member names here
-                                //   style: GoogleFonts.epilogue(
-                                //     fontSize: 12,
-                                //     fontWeight: FontWeight.w500,
-                                //     color: theme ? AppColors.white : AppColors.black,
-                                //   ),
-                                //   overflow: TextOverflow.ellipsis,
-                                // ),
-                              ],
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Expanded(
+                          child: FileInfoCardGridView(
+                            color: accentColor,
+                            projectId: widget.id,
+                            childAspectRatio: _size.width < 1400 ? 1.1 : 1.4,
+                          ),
+                        ),
+                        const SizedBox(width: 15),
+                        Expanded(
+                          child: Card(
+                            elevation: 3,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(15),
                             ),
-                          );
-                        },
-                      ),
+                            color: theme
+                                ? AppColors.dark.withOpacity(0.9)
+                                : AppColors.white,
+                            child: Padding(
+                              padding: const EdgeInsets.all(15),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Row(
+                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      Text(
+                                        "Members",
+                                        style: GoogleFonts.epilogue(
+                                          fontSize: width * 0.018,
+                                          fontWeight: FontWeight.w500,
+                                          color: theme
+                                              ? AppColors.white
+                                              : AppColors.black,
+                                        ),
+                                      ),
+                                      if (!isNameTaken)
+                                      FloatingActionButton(
+                                        onPressed: () {
+                                          _showMemeberDialog(context);
+                                        },
+                                        mini: true,
+                                        shape: const CircleBorder(),
+                                        backgroundColor: accentColor,
+                                        child: const Icon(
+                                          Icons.add,
+                                          color: Colors.white,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                  const SizedBox(height: 15),
+                                  memberPhotos.isEmpty
+                                      ? const Center(
+                                          child: CircularProgressIndicator(),
+                                        )
+                                      : Container(
+                                          height: 100,
+                                          child: ListView.builder(
+                                            scrollDirection: Axis.horizontal,
+                                            itemCount: memberPhotos.length,
+                                            itemBuilder: (context, index) {
+                                              return Padding(
+                                                padding:
+                                                    const EdgeInsets.symmetric(
+                                                        horizontal: 5),
+                                                child: Column(
+                                                  mainAxisSize:
+                                                      MainAxisSize.min,
+                                                  children: [
+                                                    memberPhotos[index],
+                                                    const SizedBox(height: 5),
+                                                    // Text(
+                                                    //   memberNames[index], // Assuming you save the member names here
+                                                    //   style: GoogleFonts.epilogue(
+                                                    //     fontSize: 12,
+                                                    //     fontWeight: FontWeight.w500,
+                                                    //     color: theme ? AppColors.white : AppColors.black,
+                                                    //   ),
+                                                    //   overflow: TextOverflow.ellipsis,
+                                                    // ),
+                                                  ],
+                                                ),
+                                              );
+                                            },
+                                          ),
+                                        ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
-            ],
-          ),
-        ),
-      ),
-    ),
-  ],
-),
-
                     const SizedBox(
                       height: 30,
                     ),
                     Row(
-                      mainAxisAlignment: MainAxisAlignment.start,
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         Container(
                           width: width / 2.5,
@@ -521,8 +752,8 @@ class _DashboardState extends State<Dashboard> {
                                                     ? Icons.check_circle
                                                     : Icons.flag,
                                                 color: isCompleted
-                                                    ? Colors.green
-                                                    : (accentColor),
+                                                    ? accentColor
+                                                    : theme? AppColors.white : AppColors.dark ,
                                                 size: 30,
                                               ),
                                               title: Text(
@@ -535,7 +766,7 @@ class _DashboardState extends State<Dashboard> {
                                                           .lineThrough
                                                       : null,
                                                   color: isCompleted
-                                                      ? Colors.grey
+                                                      ? accentColor
                                                       : (theme
                                                           ? AppColors.white
                                                           : AppColors.black),
@@ -556,10 +787,8 @@ class _DashboardState extends State<Dashboard> {
                                                       ? Icons.undo
                                                       : Icons.done,
                                                   color: isCompleted
-                                                      ? Colors.green
-                                                      : theme
-                                                          ? AppColors.white
-                                                          : AppColors.black,
+                                                      ? AppColors.errorColor
+                                                      : accentColor,
                                                 ),
                                                 onPressed:
                                                     toggleCompletion, // Toggle on click
@@ -570,6 +799,208 @@ class _DashboardState extends State<Dashboard> {
                                       },
                                     );
                                   },
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                        Container(
+                          width: width / 2.5,
+                          height: height / 2,
+                          child: SingleChildScrollView(
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.start,
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    Text(
+                                      "Project Documents",
+                                      style: GoogleFonts.epilogue(
+                                        fontSize: width * 0.018,
+                                        fontWeight: FontWeight.w500,
+                                        color: theme
+                                            ? AppColors.white
+                                            : AppColors.dark,
+                                      ),
+                                    ),
+                                    if (!isNameTaken)
+                                      FloatingActionButton(
+                                        onPressed:
+                                            _isUploading ? null : _FileImage,
+                                        mini: true,
+                                        shape: const CircleBorder(),
+                                        backgroundColor: accentColor,
+                                        child: const Icon(
+                                          Icons.add,
+                                          color: Colors.white,
+                                        ),
+                                      ),
+                                  ],
+                                ),
+                                const SizedBox(
+                                  height: 10,
+                                ),
+                                Container(
+                                  child:
+                                      StreamBuilder<List<Map<String, dynamic>>>(
+                                    stream: _fetchFiles(),
+                                    builder: (context, snapshot) {
+                                      if (snapshot.connectionState ==
+                                          ConnectionState.waiting) {
+                                        return const Center(
+                                            child: CircularProgressIndicator());
+                                      }
+
+                                      if (!snapshot.hasData ||
+                                          snapshot.data!.isEmpty) {
+                                        return const Center(
+                                            child: Text('No files found.'));
+                                      }
+
+                                      final files = snapshot.data!;
+                                      return ListView.builder(
+                                        shrinkWrap: true,
+                                        padding: const EdgeInsets.symmetric(
+                                            vertical: 8.0, horizontal: 16.0),
+                                        itemCount: files.length,
+                                        itemBuilder: (context, index) {
+                                          final file = files[index];
+                                          return Card(
+                                            elevation: 5,
+                                            shape: RoundedRectangleBorder(
+                                              borderRadius:
+                                                  BorderRadius.circular(12),
+                                            ),
+                                            color: theme
+                                                ? Colors.grey[900]
+                                                : AppColors.white,
+                                            child: Padding(
+                                              padding:
+                                                  const EdgeInsets.all(12.0),
+                                              child: Column(
+                                                crossAxisAlignment:
+                                                    CrossAxisAlignment.start,
+                                                children: [
+                                                  Row(
+                                                    children: [
+                                                      HugeIcon(
+                                                        icon: HugeIcons
+                                                            .strokeRoundedFile02,
+                                                        color: theme
+                                                            ? AppColors.white
+                                                            : AppColors.dark,
+                                                      ),
+                                                      const SizedBox(width: 8),
+                                                      Expanded(
+                                                        child: Text(
+                                                          overflow: TextOverflow
+                                                              .ellipsis,
+                                                          file['name'],
+                                                          style: GoogleFonts
+                                                              .epilogue(
+                                                            color: theme
+                                                                ? Colors.white
+                                                                : AppColors
+                                                                    .dark,
+                                                            fontWeight:
+                                                                FontWeight.bold,
+                                                          ),
+                                                        ),
+                                                      ),
+                                                    ],
+                                                  ),
+                                                  const SizedBox(height: 8),
+                                                  Column(
+                                                    crossAxisAlignment:
+                                                        CrossAxisAlignment
+                                                            .start,
+                                                    children: [
+                                                      Text(
+                                                        DateFormat.yMMMd()
+                                                            .add_jm()
+                                                            .format(file[
+                                                                    'uploadedAt']
+                                                                .toDate()),
+                                                        style: GoogleFonts
+                                                            .epilogue(
+                                                          color: theme
+                                                              ? Colors.white54
+                                                              : AppColors.dark,
+                                                        ),
+                                                      ),
+                                                    ],
+                                                  ),
+                                                  const SizedBox(height: 8),
+                                                  Align(
+                                                    alignment:
+                                                        Alignment.bottomRight,
+                                                    child: IconButton(
+                                                      icon: HugeIcon(
+                                                        icon: HugeIcons
+                                                            .strokeRoundedDownload05,
+                                                        color: theme
+                                                            ? AppColors.white
+                                                            : AppColors.dark,
+                                                      ),
+                                                      onPressed: () async {
+                                                        final url = file[
+                                                            'url']; // The URL of the file you want to download
+
+                                                        try {
+                                                          final directory =
+                                                              await getDownloadsDirectory();
+                                                          if (directory ==
+                                                              null) {
+                                                            ScaffoldMessenger
+                                                                    .of(context)
+                                                                .showSnackBar(
+                                                              const SnackBar(
+                                                                  content: Text(
+                                                                      'Failed to get storage directory.')),
+                                                            );
+                                                            return;
+                                                          }
+
+                                                          final filePath =
+                                                              '${directory.path}/${file['name']}';
+
+                                                          // Download the file using dio
+                                                          Dio dio = Dio();
+                                                          await dio.download(
+                                                              url, filePath);
+
+                                                          // Show a success message
+                                                          ScaffoldMessenger.of(
+                                                                  context)
+                                                              .showSnackBar(
+                                                            SnackBar(
+                                                                content: Text(
+                                                                    'Downloaded: ${file['name']} to $filePath')),
+                                                          );
+                                                        } catch (e) {
+                                                          // Handle any errors that occur during the download
+                                                          ScaffoldMessenger.of(
+                                                                  context)
+                                                              .showSnackBar(
+                                                            SnackBar(
+                                                                content: Text(
+                                                                    'Error downloading file: $e')),
+                                                          );
+                                                        }
+                                                      },
+                                                    ),
+                                                  ),
+                                                ],
+                                              ),
+                                            ),
+                                          );
+                                        },
+                                      );
+                                    },
+                                  ),
                                 ),
                               ],
                             ),
@@ -670,8 +1101,9 @@ class FileInfoCardGridView extends StatelessWidget {
             Duration remainingTime = endDate.difference(now);
 
             // Calculate total duration for the project
-            Duration totalDuration = endDate.difference(_parseDate(projectData["startDate"]));
-            
+            Duration totalDuration =
+                endDate.difference(_parseDate(projectData["startDate"]));
+
             // Calculate progress percentage for the time left
             double timeLeftPercentage = totalDuration.inMilliseconds > 0
                 ? (remainingTime.inMilliseconds / totalDuration.inMilliseconds)
@@ -708,7 +1140,8 @@ class FileInfoCardGridView extends StatelessWidget {
                 } else {
                   // Deadline progress card with progress bar
                   return FileInfoCard(
-                    icon: Icons.calendar_today, // You can choose an appropriate icon
+                    icon: Icons
+                        .calendar_today, // You can choose an appropriate icon
                     info: CardInfo(
                       title: "Time Left",
                       color: Colors.blue,

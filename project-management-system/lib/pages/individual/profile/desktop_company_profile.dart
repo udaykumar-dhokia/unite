@@ -38,7 +38,6 @@ class _DesktopCompanyProfileState extends State<DesktopCompanyProfile> {
     for (var i in widget.userData!["companyTags"]) {
       tags.add(i);
     }
-    FirebaseAuth.instance.signOut();
   }
 
   @override

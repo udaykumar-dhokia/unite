@@ -1,9 +1,11 @@
 import 'dart:io';
 
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:hugeicons/hugeicons.dart';
 import 'package:intl/intl.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:provider/provider.dart';
 import 'package:unite/constants/color/color.dart';
 import 'package:unite/constants/theme/themehandler.dart';
@@ -24,6 +26,7 @@ class Drive extends StatefulWidget {
 class _DriveState extends State<Drive> {
   bool _isUploading = false;
   File? _file;
+  String _sortOrder = 'Earlier Uploads'; // Default filter option
 
   Future<void> _FileImage() async {
     FilePickerResult? result = await FilePicker.platform.pickFiles();
@@ -45,7 +48,6 @@ class _DriveState extends State<Drive> {
   }
 
   // Function to select and upload a file
-
   Future<void> _uploadFile() async {
     if (_file == null) return;
 
@@ -73,7 +75,8 @@ class _DriveState extends State<Drive> {
           .add({
         'name': fileName,
         'url': downloadUrl,
-        'uploadedAt': DateTime.now(),
+        'uploadedAt': FieldValue
+            .serverTimestamp(), // Save Timestamp as server-generated time
         'by': widget.userData["username"],
       });
 
@@ -94,14 +97,23 @@ class _DriveState extends State<Drive> {
     }
   }
 
-  // Function to fetch files from Firestore
+  // Function to fetch files from Firestore with sorting based on Timestamp
   Stream<List<Map<String, dynamic>>> _fetchFiles() {
-    return FirebaseFirestore.instance
+    Query query = FirebaseFirestore.instance
         .collection('projects')
         .doc(widget.id)
-        .collection("drive")
-        .snapshots()
-        .map(
+        .collection("drive");
+
+    // Sort by 'uploadedAt' Timestamp field (Descending for Recent Uploads, Ascending for Earlier Uploads)
+    if (_sortOrder == 'Recent Uploads') {
+      query = query.orderBy('uploadedAt',
+          descending: true); // Sort by most recent upload first
+    } else {
+      query = query.orderBy('uploadedAt',
+          descending: false); // Sort by earliest upload first
+    }
+
+    return query.snapshots().map(
           (snapshot) => snapshot.docs
               .map((doc) =>
                   {'id': doc.id, ...doc.data() as Map<String, dynamic>})
@@ -130,23 +142,62 @@ class _DriveState extends State<Drive> {
       appBar: AppBar(
         automaticallyImplyLeading: false,
         surfaceTintColor: AppColors.transparent,
-        toolbarHeight: 80,
+        toolbarHeight: 120, // Increased height to accommodate filter row
         backgroundColor: theme ? AppColors.dark : AppColors.white,
-        title: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        title: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              "Drive",
-              style: GoogleFonts.epilogue(
-                fontSize: width * 0.02,
-                fontWeight: FontWeight.bold,
-                color: theme ? AppColors.white : AppColors.black,
-              ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  "Drive",
+                  style: GoogleFonts.epilogue(
+                    fontSize: width * 0.02,
+                    fontWeight: FontWeight.bold,
+                    color: theme ? AppColors.white : AppColors.black,
+                  ),
+                ),
+                HugeIcon(
+                  icon: HugeIcons.strokeRoundedFolder01,
+                  color: theme ? AppColors.white : AppColors.black,
+                  size: 18,
+                ),
+              ],
             ),
-            HugeIcon(
-              icon: HugeIcons.strokeRoundedFolder01,
-              color: theme ? AppColors.white : AppColors.black,
-              size: 18,
+            const SizedBox(height: 8), // Space between title and filter row
+            Row(
+              children: [
+                Text(
+                  "Sort By: ",
+                  style: GoogleFonts.epilogue(
+                    fontSize: 16,
+                    color: theme ? AppColors.white : AppColors.black,
+                  ),
+                ),
+                DropdownButton<String>(
+                  value: _sortOrder,
+                  items: const [
+                    DropdownMenuItem(
+                      child: Text("Earlier Uploads"),
+                      value: 'Earlier Uploads',
+                    ),
+                    DropdownMenuItem(
+                      child: Text("Recent Uploads"),
+                      value: 'Recent Uploads',
+                    ),
+                  ],
+                  onChanged: (value) {
+                    setState(() {
+                      _sortOrder = value!;
+                    });
+                  },
+                  style: GoogleFonts.epilogue(
+                    color: theme ? AppColors.white : AppColors.black,
+                  ),
+                  dropdownColor: theme ? AppColors.dark : AppColors.white,
+                ),
+              ],
             ),
           ],
         ),
@@ -179,7 +230,7 @@ class _DriveState extends State<Drive> {
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12),
                 ),
-                color: theme? Colors.grey[900] : AppColors.white ,
+                color: theme ? Colors.grey[900] : AppColors.white,
                 child: Padding(
                   padding: const EdgeInsets.all(12.0),
                   child: Column(
@@ -188,12 +239,13 @@ class _DriveState extends State<Drive> {
                     children: [
                       Row(
                         children: [
-                          HugeIcon(icon: HugeIcons.strokeRoundedFile02, color: theme? AppColors.white : AppColors.dark),
+                          HugeIcon(
+                              icon: HugeIcons.strokeRoundedFile02,
+                              color: theme ? AppColors.white : AppColors.dark),
                           const SizedBox(width: 8),
                           Expanded(
                             child: Text(
-                              overflow:
-                                  TextOverflow.ellipsis,
+                              overflow: TextOverflow.ellipsis,
                               file['name'],
                               style: GoogleFonts.epilogue(
                                 color: theme ? Colors.white : AppColors.dark,
@@ -209,26 +261,60 @@ class _DriveState extends State<Drive> {
                         children: [
                           Text(
                             "@${file['by']}",
-                            style: GoogleFonts.epilogue(color:theme? Colors.white70: AppColors.dark),
+                            style: GoogleFonts.epilogue(
+                                color: theme ? Colors.white70 : AppColors.dark),
                           ),
                           Text(
                             DateFormat.yMMMd()
                                 .add_jm()
                                 .format(file['uploadedAt'].toDate()),
-                            style: GoogleFonts.epilogue(color: theme? Colors.white54 : AppColors.dark),
+                            style: GoogleFonts.epilogue(
+                                color: theme ? Colors.white54 : AppColors.dark),
                           ),
                         ],
                       ),
                       Align(
                         alignment: Alignment.bottomRight,
                         child: IconButton(
-                          icon: HugeIcon(icon: HugeIcons.strokeRoundedDownload05 , color: theme? AppColors.white: AppColors.dark),
+                          icon: HugeIcon(
+                              icon: HugeIcons.strokeRoundedDownload05,
+                              color: theme ? AppColors.white : AppColors.dark),
                           onPressed: () async {
-                            final url = file['url'];
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(
-                                  content: Text('Download URL copied: $url')),
-                            );
+                            final url = file[
+                                'url']; // The URL of the file you want to download
+
+                            try {
+                              final directory = await getDownloadsDirectory();
+                              if (directory == null) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(
+                                      content: Text(
+                                          'Failed to get storage directory.')),
+                                );
+                                return;
+                              }
+
+                              final filePath =
+                                  '${directory.path}/${file['name']}';
+
+                              // Download the file using dio
+                              Dio dio = Dio();
+                              await dio.download(url, filePath);
+
+                              // Show a success message
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                    content: Text(
+                                        'Downloaded: ${file['name']} to $filePath')),
+                              );
+                            } catch (e) {
+                              // Handle any errors that occur during the download
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                    content:
+                                        Text('Error downloading file: $e')),
+                              );
+                            }
                           },
                         ),
                       ),

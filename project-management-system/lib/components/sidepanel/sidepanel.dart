@@ -223,47 +223,7 @@ class _SidePanelState extends State<SidePanel> {
                                 const SizedBox(
                                   height: 20,
                                 ),
-                                GestureDetector(
-                                  onTap: () {
-                                    setState(() {
-                                      page = "teams";
-                                    });
-                                  },
-                                  child: Row(
-                                    mainAxisAlignment: _isHovered
-                                        ? MainAxisAlignment.start
-                                        : MainAxisAlignment.center,
-                                    children: [
-                                      HugeIcon(
-                                        size: 22,
-                                        icon: HugeIcons.strokeRoundedUserGroup,
-                                        color: page == "teams"
-                                            ? accent
-                                            : !isDark
-                                                ? AppColors.dark
-                                                : AppColors.grey,
-                                      ),
-                                      if (_isHovered && _isTextVisible)
-                                        const SizedBox(
-                                          width: 10,
-                                        ),
-                                      if (_isHovered && _isTextVisible)
-                                        Text(
-                                          "Teams",
-                                          style: GoogleFonts.epilogue(
-                                              color: page == "teams"
-                                                  ? accent
-                                                  : isDark
-                                                      ? AppColors.white
-                                                      : AppColors.black,
-                                              fontSize: width * 0.009),
-                                        ),
-                                    ],
-                                  ),
-                                ),
-                                const SizedBox(
-                                  height: 20,
-                                ),
+                                
                                 GestureDetector(
                                   onTap: () {
                                     setState(() {
