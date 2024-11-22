@@ -37,6 +37,30 @@ The Project Management System is a robust and comprehensive solution crafted to 
 - **Resource Utilization Reports**: Analyze how resources are used across projects to identify potential optimizations.
 - **Exportable Reports**: Export reports to share with stakeholders, clients, or team members, providing transparency and accountability.
 
+## unite.ai Features
+
+The Project Management System integrates **Unite.ai**, an intelligent AI-powered assistant designed to optimize your development process. Key features include:
+
+### 1. **Code Translation**
+   - Convert code seamlessly between programming languages (e.g., Java to Python, Python to Dart).
+   - Ensure consistent functionality with AI-assisted verification during translation.
+
+### 2. **Code Summarization**
+   - Generate concise and clear summaries of large codebases.
+   - Improve code readability by explaining complex methods or classes in simple language.
+
+### 3. **Error Detection and Correction**
+   - Identify syntax errors, logical mistakes, or inefficiencies in real-time.
+   - Suggest precise fixes with reasoning to accelerate debugging.
+
+### 4. **Code Optimization**
+   - Analyze and refactor your code for performance and efficiency.
+   - Recommend improvements in algorithm choice, memory usage, or execution speed.
+
+These features, powered by Unite.ai, aim to simplify development, enhance collaboration, and reduce time spent on repetitive tasks, so you can focus on delivering quality software.
+
+---
+
 ## Built With
 
 - **Flutter**: The frontend is developed with Flutter, allowing for a responsive, cross-platform experience that works seamlessly on Android, iOS, and web.
@@ -83,11 +107,14 @@ The Project Management System is organized in a way that promotes modularity and
 
 ## Contributors
 
-Special thanks to all the amazing contributors who have helped bring this project to life!
-
-<a href="https://github.com/udaykumar-dhokia/unite/graphs/contributors">
-  <img src="https://contrib.rocks/image?repo=udaykumar-dhokia/unite" />
-</a>
+A huge shout-out to our contributors:
+- ![Udaykumar Dhokia](https://img.shields.io/badge/-ud.dev-181717?style=flat&logo=github&logoColor=white&link=https://github.com/udaykumar-dhokia)
+- ![Krish Kavathitya](https://img.shields.io/badge/-krish-181717?style=flat&logo=github&logoColor=white&link=https://github.com/Krish-Kavathiya)
+- ![Chandan Deshani](https://img.shields.io/badge/-chandan-181717?style=flat&logo=github&logoColor=white&link=https://github.com/chandandeshani)
+- ![Prasanna](https://img.shields.io/badge/-prasanna-181717?style=flat&logo=github&logoColor=white&link=https://github.com/prasanna00019)
+- ![Stuti Patel](https://img.shields.io/badge/-stutiipatell-181717?style=flat&logo=github&logoColor=white&link=https://github.com/stutiipatell)
+- ![Snehal Joshi](https://img.shields.io/badge/-snehal-181717?style=flat&logo=github&logoColor=white&link=https://github.com/snehaljoshi2004)
+- ![Devyanshi Goswami](https://img.shields.io/badge/-devyanshi-181717?style=flat&logo=github&logoColor=white&link=https://github.com/DevyanshiGoswami)
 
 We welcome additional contributions and feedback. If you would like to contribute, please reach out or submit a pull request.
 
